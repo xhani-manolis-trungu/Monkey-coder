@@ -1,0 +1,11 @@
+{
+  "name": "monkey-coder",
+  "version": "1.0.0",
+  "description": "A no-code game maker for kids: snap logic blocks together and drag pictures onto the stage.",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve .",
+    "test": "node --test tests/*.test.js"
+  },
+  "license": "MIT"
+}
