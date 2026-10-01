@@ -54,7 +54,7 @@
   }
 
   function roundRect(ctx, r, rad) {
-    var k = Math.min(rad, r.w / 2, r.h / 2);
+    var k = Math.max(0, Math.min(rad, r.w / 2, r.h / 2));
     ctx.beginPath();
     ctx.moveTo(r.x + k, r.y);
     ctx.arcTo(r.x + r.w, r.y, r.x + r.w, r.y + r.h, k);
@@ -191,8 +191,18 @@
 
   Tour.prototype.frame = function (now) {
     if (!this.active) return;
-    var dt = Math.min(50, now - this.last);
-    this.last = now;
+    try {
+      this.tick(now);
+    } catch (err) {
+      if (window.console) console.error(err); // never let one bad frame freeze the tour
+    }
+    if (this.active) requestAnimationFrame(this._frame);
+  };
+
+  Tour.prototype.tick = function (now) {
+    // The first animation frame can be stamped a moment before start(): never go backwards.
+    var dt = Math.max(0, Math.min(50, now - this.last));
+    this.last = Math.max(this.last, now);
     this.time += dt;
     this.stepTime += dt;
 
@@ -222,7 +232,6 @@
         this.card.classList.remove('success');
       }
     }
-    if (this.active) requestAnimationFrame(this._frame);
   };
 
   Tour.prototype.animateHoles = function (targets, dt) {
@@ -270,6 +279,7 @@
     ctx.globalCompositeOperation = 'destination-out';
     var self = this;
     this.shown.forEach(function (s) {
+      if (s.r.w <= 0 || s.r.h <= 0) return;
       ctx.save();
       ctx.globalAlpha = s.alpha;
       ctx.shadowColor = 'rgba(0,0,0,1)';
@@ -283,6 +293,7 @@
     ctx.globalCompositeOperation = 'source-over';
     var pulse = 0.55 + 0.45 * Math.sin(this.time / 380);
     this.shown.forEach(function (s, i) {
+      if (s.r.w <= 0 || s.r.h <= 0) return;
       ctx.save();
       ctx.globalAlpha = s.alpha;
       ctx.strokeStyle = 'rgba(255, 210, 90, ' + (0.65 + 0.35 * pulse) + ')';
