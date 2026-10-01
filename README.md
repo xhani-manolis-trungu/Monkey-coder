@@ -73,3 +73,5 @@ Add an entry to `MC.LEVELS` in `js/levels.js`. Maps are 10×7 text grids: `M` mo
 npm test     # runs the engine tests with Node's built-in test runner
 npm start    # optional: serve the folder at http://localhost:3000
 ```
+
+The same tests run on GitHub Actions for every pull request and every push to `main` (`.github/workflows/test.yml`).
