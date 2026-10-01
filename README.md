@@ -35,13 +35,15 @@ Start from a story template (**Banana Party**, **Space Rescue**, **Ocean Treasur
 
 ## The blocks
 
+Every block has a picture at its start, so children who are still learning to read can tell blocks apart.
+
 | Category | Blocks |
 |---|---|
-| ⚡ Events | when ▶ Run clicked · when [key] pressed · when I touch [thing] · every [n] seconds |
-| 🏃 Move | move [n] steps · turn [left/right] · jump · step [direction] [n] · step toward [thing] · step randomly · jump to a random spot · set speed |
-| 💬 Looks | say [text] · hide · show · spin |
-| 🔁 Control | repeat [n] times · forever · wait [n] seconds · if touching [thing] · if score ≥ [n] |
-| 🏆 Game | collect it · add [n] to score · play sound · you win! · game over |
+| ⚡ Events | 🏁 when ▶ Run clicked · ⌨️ when [key] pressed · 🤝 when I touch [thing] · ⏰ every [n] seconds |
+| 🏃 Move | 👣 move [n] steps · ↩️/↪️ turn [left/right] · 🦘 jump · 👟 step [direction] [n] · 🎯 step toward [thing] · 🎲 step randomly · 🔀 jump to a random spot · ⏱️ set speed |
+| 💬 Looks | 💬 say [text] · 🙈 hide · 👀 show · 🌀 spin |
+| 🔁 Control | 🔁 repeat [n] times · ♾️ forever · ⏳ wait [n] seconds · 🤔 if touching [thing] · 🏅 if score ≥ [n] |
+| 🏆 Game | 🧺 collect it · ➕ add [n] to score · 🔊 play sound · 🏆 you win! · 💥 game over |
 
 Drag a block out of the code area (back to the block box or onto the 🗑️) to delete it. Dropping a block under, to the right of, inside or on top of another one snaps it into place. A script can grow sideways as well as down, like a chain: it runs in chain order, from the first block to the last, whether each one is attached underneath or to the right.
 

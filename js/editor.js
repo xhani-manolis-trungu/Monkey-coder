@@ -70,7 +70,6 @@
       self.catsEl.appendChild(btn);
       list.forEach(function (type) {
         var b = self.buildBlock(MC.newBlock(type), true);
-        b.title = MC.BLOCKS[type].help || '';
         b.addEventListener('pointerdown', function (e) { self.startPress(e, { from: 'palette', type: type }, b); });
         var wrap = el('div', 'palette-item');
         wrap.appendChild(b);
@@ -191,6 +190,10 @@
     b.style.setProperty('--c', catColor(def.cat));
     b.dataset.id = block.id;
     var row = el('div', 'block-row');
+    var icon = el('span', 'block-icon', MC.blockIcon(block));
+    icon.setAttribute('aria-hidden', 'true');
+    row.appendChild(icon);
+    b.title = def.help || '';
     var parts = def.label.split(/(\{\w+\})/);
     parts.forEach(function (part) {
       var m = /^\{(\w+)\}$/.exec(part);
@@ -235,6 +238,9 @@
       input.value = value;
       input.addEventListener('change', function () {
         block.args[name] = input.value;
+        // Some icons follow the setting (turn ↩️ / ↪️).
+        var iconEl = input.closest('.block-row') && input.closest('.block-row').querySelector('.block-icon');
+        if (iconEl) iconEl.textContent = MC.blockIcon(block);
         self.onChange();
       });
     } else {
