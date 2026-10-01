@@ -513,6 +513,27 @@ body[data-mode="maker"] #stage { cursor: pointer; }
 }
 .ws-who { font-size: 17px; }
 .ws-tip { color: var(--muted); font-size: 13px; flex: 1; }
+.arrange {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 3px 2px 10px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+}
+.arrange-label { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 4px; }
+.arrange button {
+  width: 30px; height: 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--panel-2);
+  font-size: 15px;
+  line-height: 1;
+}
+.arrange button:hover { background: var(--accent); color: #fff; }
+.arrange button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.ws-wrap:has(.workspace.locked) .arrange { opacity: 0.5; pointer-events: none; }
 .workspace {
   position: relative;
   flex: 1;

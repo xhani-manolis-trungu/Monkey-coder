@@ -45,6 +45,8 @@ Start from a story template (**Banana Party**, **Space Rescue**, **Ocean Treasur
 
 Drag a block out of the code area (back to the block box or onto the 🗑️) to delete it. Dropping a block under, inside or on top of another one snaps it into place.
 
+Scripts can go anywhere in the code area: drag a script by its top block and drop it where you like. It lands on the nearest dot so scripts line up, and the code area scrolls by itself when you drag near its edge. The **Arrange** buttons line all scripts up for you: **⬇** one under another, **➡** side by side, or **▦** as a grid that fills the space.
+
 ## Project layout
 
 ```

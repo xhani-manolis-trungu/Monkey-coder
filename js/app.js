@@ -954,7 +954,9 @@
   var fullBox = $('opt-full');
   fullBox.checked = fullOpt;
   fullBox.addEventListener('change', function () { fullOpt = fullBox.checked; save('fullOnRun', fullOpt); });
-  $('btn-tidy').addEventListener('click', function () { if (!editor.locked) editor.tidy(); });
+  document.querySelectorAll('#arrange button').forEach(function (b) {
+    b.addEventListener('click', function () { if (!editor.locked) editor.arrange(b.dataset.arrange); });
+  });
   $('btn-hint').addEventListener('click', function () { $('story-hint').hidden = !$('story-hint').hidden; });
   $('btn-guide').addEventListener('click', startTour);
   $('btn-new').addEventListener('click', showTemplates);

@@ -116,7 +116,12 @@
         <div class="ws-header">
           <span class="ws-who">Code for <b id="ws-sprite">🐒 Momo</b></span>
           <span class="ws-tip">drag blocks in · drag them back out to remove</span>
-          <button type="button" class="pill small" id="btn-tidy" title="Tidy up">🧹 Tidy</button>
+          <div class="arrange" id="arrange" role="group" aria-label="Arrange my code">
+            <span class="arrange-label">Arrange</span>
+            <button type="button" data-arrange="column" title="One under another" aria-label="Arrange in a column">⬇</button>
+            <button type="button" data-arrange="row" title="Side by side" aria-label="Arrange side by side">➡</button>
+            <button type="button" data-arrange="grid" title="Fill the space like a grid" aria-label="Arrange in a grid">▦</button>
+          </div>
         </div>
         <div class="workspace" id="workspace">
           <div class="ws-canvas" id="ws-canvas"></div>

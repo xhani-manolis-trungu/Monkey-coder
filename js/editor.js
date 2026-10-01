@@ -40,6 +40,7 @@
     this.indicator = el('div', 'snap-indicator');
     this._onMove = this.onMove.bind(this);
     this._onUp = this.onUp.bind(this);
+    this._scrollStep = this.scrollStep.bind(this);
   }
 
   /* ---------- palette ---------- */
@@ -112,20 +113,53 @@
     this.lastHighlight = '';
   };
 
-  /** Arrange the scripts neatly in a column. */
-  Editor.prototype.tidy = function () {
-    var self = this;
-    var y = 16;
+  var GRID = 22; // the dots in the code area are 22px apart
+
+  function snap(v) { return Math.max(0, Math.round(v / GRID) * GRID); }
+
+  /**
+   * Line the scripts up neatly. Keeps the order they already have on the page
+   * (top to bottom, then left to right).
+   *   column: one under another · row: side by side · grid: fill the width, then wrap
+   */
+  Editor.prototype.arrange = function (mode) {
     var stackEls = this.canvasEl.querySelectorAll(':scope > .stack');
-    this.stacks.forEach(function (st, i) {
-      st.x = 16;
-      st.y = y;
-      y += (stackEls[i] ? stackEls[i].offsetHeight : 60) + 24;
+    var items = this.stacks.map(function (st, i) {
+      var e = stackEls[i];
+      return { st: st, w: e ? e.offsetWidth : 200, h: e ? e.offsetHeight : 60 };
+    });
+    items.sort(function (a, b) { return (a.st.y - b.st.y) || (a.st.x - b.st.x); });
+    var x = GRID;
+    var y = GRID;
+    var rowH = 0;
+    var maxRight = Math.max(GRID * 12, this.wsEl.clientWidth - GRID);
+    items.forEach(function (it) {
+      if (mode === 'row') {
+        it.st.x = x;
+        it.st.y = GRID;
+        x = snap(x + it.w + GRID);
+      } else if (mode === 'grid') {
+        if (x > GRID && x + it.w > maxRight) {
+          x = GRID;
+          y = snap(y + rowH + GRID);
+          rowH = 0;
+        }
+        it.st.x = x;
+        it.st.y = y;
+        x = snap(x + it.w + GRID);
+        rowH = Math.max(rowH, it.h);
+      } else {
+        it.st.x = GRID;
+        it.st.y = y;
+        y = snap(y + it.h + GRID);
+      }
     });
     this.render();
     this.onChange();
-    self.wsEl.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    this.wsEl.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   };
+
+  Editor.prototype.tidy = function () { this.arrange('column'); };
 
   /* ---------- building block elements ---------- */
 
@@ -350,9 +384,40 @@
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   }
 
-  Editor.prototype.moveDrag = function (e) {
+  /** While dragging near an edge of the code area, scroll it so blocks can go anywhere. */
+  Editor.prototype.updateAutoScroll = function (e) {
+    var r = this.wsEl.getBoundingClientRect();
+    var EDGE = 44;
+    var speed = function (dist) { return Math.round(Math.min(1, Math.max(0, (EDGE - dist) / EDGE)) * 16); };
+    var inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    this.scrollV = inside ? {
+      x: speed(r.right - e.clientX) - speed(e.clientX - r.left),
+      y: speed(r.bottom - e.clientY) - speed(e.clientY - r.top)
+    } : { x: 0, y: 0 };
+    if ((this.scrollV.x || this.scrollV.y) && !this.scrolling) {
+      this.scrolling = true;
+      requestAnimationFrame(this._scrollStep);
+    }
+  };
+
+  Editor.prototype.scrollStep = function () {
+    var v = this.scrollV;
+    if (!this.drag || !v || (!v.x && !v.y)) { this.scrolling = false; return; }
+    var ws = this.wsEl;
+    // Make room to keep going right or down.
+    if (v.x > 0) this.canvasEl.style.minWidth = Math.max(this.canvasEl.offsetWidth, ws.scrollLeft + ws.clientWidth + 120) + 'px';
+    if (v.y > 0) this.canvasEl.style.minHeight = Math.max(this.canvasEl.offsetHeight, ws.scrollTop + ws.clientHeight + 120) + 'px';
+    ws.scrollLeft += v.x;
+    ws.scrollTop += v.y;
+    if (this.lastMove) this.moveDrag(this.lastMove, true);
+    requestAnimationFrame(this._scrollStep);
+  };
+
+  Editor.prototype.moveDrag = function (e, fromScroll) {
     var d = this.drag;
     if (!d) return;
+    this.lastMove = { clientX: e.clientX, clientY: e.clientY };
+    if (!fromScroll) this.updateAutoScroll(e);
     var gx = e.clientX - d.offX;
     var gy = e.clientY - d.offY;
     d.ghost.style.left = gx + 'px';
@@ -384,6 +449,8 @@
   Editor.prototype.drop = function (e) {
     var d = this.drag;
     this.drag = null;
+    this.scrollV = null;
+    this.lastMove = null;
     document.body.classList.remove('dragging-blocks');
     if (this.indicator.parentNode) this.indicator.parentNode.removeChild(this.indicator);
     if (this.trashEl) this.trashEl.classList.remove('active');
@@ -404,14 +471,11 @@
         ri.block.body.unshift.apply(ri.block.body, d.group);
       } else if (t && t.kind === 'top') {
         t.stack.blocks = d.group.concat(t.stack.blocks);
-        t.stack.x = Math.max(0, Math.round(ghostRect.left - cr.left));
-        t.stack.y = Math.max(0, Math.round(ghostRect.top - cr.top));
+        t.stack.x = snap(ghostRect.left - cr.left);
+        t.stack.y = snap(ghostRect.top - cr.top);
       } else {
-        this.stacks.push({
-          x: Math.max(0, Math.round(ghostRect.left - cr.left)),
-          y: Math.max(0, Math.round(ghostRect.top - cr.top)),
-          blocks: d.group
-        });
+        // A script dropped on its own lands on the nearest dot, so scripts line up easily.
+        this.stacks.push({ x: snap(ghostRect.left - cr.left), y: snap(ghostRect.top - cr.top), blocks: d.group });
       }
       if (t) this.onSound('pop');
     } else if (d.origin) {
