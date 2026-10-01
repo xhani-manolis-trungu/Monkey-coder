@@ -549,6 +549,53 @@
 
   /* ---------- running the game ---------- */
 
+  /* ---------- full screen ---------- */
+
+  var playArea = $('play-area');
+  var fullOpt = load('fullOnRun', false);
+
+  function isFull() { return playArea.classList.contains('is-full'); }
+
+  function setFullClass(on) {
+    playArea.classList.toggle('is-full', on);
+    var b = $('btn-full');
+    b.textContent = on ? '✕ Exit' : '⛶';
+    b.title = on ? 'Exit full screen' : 'Full screen';
+    b.setAttribute('aria-label', b.title);
+  }
+
+  /** Make the stage fill the screen. Must be called from a click. */
+  function enterFull() {
+    if (isFull()) return;
+    setFullClass(true);
+    var req = playArea.requestFullscreen || playArea.webkitRequestFullscreen;
+    if (!req) return; // no Fullscreen API (e.g. iPhone): the page-filling class is enough
+    try {
+      var p = req.call(playArea);
+      if (p && p.catch) p.catch(function () { /* blocked: keep the page-filling version */ });
+    } catch (e) { /* same */ }
+  }
+
+  function exitFull() {
+    if (!isFull()) return;
+    setFullClass(false);
+    var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fsEl) {
+      var exit = document.exitFullscreen || document.webkitExitFullscreen;
+      try {
+        var p = exit.call(document);
+        if (p && p.catch) p.catch(function () {});
+      } catch (e) { /* ignore */ }
+    }
+  }
+
+  function onFullscreenChange() {
+    // The child pressed Esc (or the browser left full screen by itself).
+    if (!(document.fullscreenElement || document.webkitFullscreenElement)) setFullClass(false);
+  }
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+
   function runGame() {
     if (isPlaying()) { stopGame(); return; }
     hideOverlay();
@@ -569,13 +616,16 @@
       }
     });
     state.engine = engine;
+    if (fullOpt && !tour.active) enterFull();
     engine.start();
     updateLock();
     updateRunButton();
     $('keypad').hidden = state.mode !== 'maker';
   }
 
-  function stopGame() {
+  /** Stop the game. Leaves full screen too (so the code can be changed), unless keepFull. */
+  function stopGame(keepFull) {
+    if (keepFull !== true) exitFull();
     if (state.engine) state.engine.stop();
     state.engine = null;
     hideOverlay();
@@ -618,7 +668,7 @@
           title: status === 'win' ? 'You win!' : 'Game over',
           text: 'Score: ' + engine.score,
           actions: [
-            { label: '▶ Play again', go: true, fn: function () { stopGame(); runGame(); } },
+            { label: '▶ Play again', go: true, fn: function () { stopGame(true); runGame(); } },
             { label: '✏️ Change my game', fn: stopGame }
           ]
         });
@@ -899,7 +949,11 @@
   $('btn-home').addEventListener('click', showWelcome);
   $('btn-help').addEventListener('click', showHelp);
   $('btn-run').addEventListener('click', runGame);
-  $('btn-reset').addEventListener('click', stopGame);
+  $('btn-reset').addEventListener('click', function () { stopGame(); });
+  $('btn-full').addEventListener('click', function () { if (isFull()) exitFull(); else enterFull(); });
+  var fullBox = $('opt-full');
+  fullBox.checked = fullOpt;
+  fullBox.addEventListener('change', function () { fullOpt = fullBox.checked; save('fullOnRun', fullOpt); });
   $('btn-tidy').addEventListener('click', function () { if (!editor.locked) editor.tidy(); });
   $('btn-hint').addEventListener('click', function () { $('story-hint').hidden = !$('story-hint').hidden; });
   $('btn-guide').addEventListener('click', startTour);
@@ -964,6 +1018,7 @@
   var KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', ' ': 'space', Spacebar: 'space' };
   window.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && !$('modal').hidden) { closeModal(); return; }
+    if (e.key === 'Escape' && isFull() && !tour.active) { exitFull(); return; }
     var tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     var k = KEYS[e.key];

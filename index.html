@@ -58,6 +58,7 @@
         </div>
       </div>
 
+      <div class="play-area" id="play-area">
       <div class="stage-wrap" id="stage-wrap">
         <canvas id="stage" width="640" height="448" aria-label="Game stage"></canvas>
         <div class="hud" id="hud" hidden></div>
@@ -76,9 +77,11 @@
       <div class="run-bar">
         <button type="button" class="run-btn" id="btn-run">▶ Run</button>
         <button type="button" class="pill" id="btn-reset" title="Put everything back">↺ Reset</button>
+        <button type="button" class="pill full-btn" id="btn-full" title="Full screen" aria-label="Full screen">⛶</button>
         <label class="speed story-only" title="Speed">🐢 <input type="range" id="speed" min="0" max="2" step="1" value="1" aria-label="Speed"> 🐇</label>
         <span class="run-tip maker-only" id="run-tip">Tip: click a picture to see its code</span>
       </div>
+      <label class="full-opt" for="opt-full"><input type="checkbox" id="opt-full"> ⛶ Play full screen when I press Run</label>
 
       <div class="keypad maker-only" id="keypad" hidden>
         <button type="button" data-key="left" aria-label="Left">◀</button>
@@ -86,6 +89,7 @@
         <button type="button" data-key="down" aria-label="Down">▼</button>
         <button type="button" data-key="right" aria-label="Right">▶</button>
         <button type="button" data-key="space" class="space" aria-label="Space">space</button>
+      </div>
       </div>
 
       <div class="panel maker-only">

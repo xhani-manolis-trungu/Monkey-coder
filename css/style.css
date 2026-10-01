@@ -349,6 +349,33 @@ body[data-mode="maker"] #stage { cursor: pointer; }
 .keypad button.space { width: 96px; font-size: 16px; }
 .keypad button:active { transform: translateY(3px); box-shadow: 0 1px 0 #2f6fcc; }
 
+/* ---------- Full screen play ---------- */
+.play-area { display: flex; flex-direction: column; gap: 12px; }
+.full-btn { font-size: 18px; padding: 3px 12px; line-height: 1.2; }
+.full-opt { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; margin-top: -4px; cursor: pointer; }
+.full-opt input { width: 18px; height: 18px; accent-color: var(--green); }
+.play-area.is-full {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(ellipse at center, var(--header-a), var(--header-b) 70%, #0d3317);
+}
+.play-area.is-full .stage-wrap {
+  /* as big as possible while keeping the 10×7 grid shape and room for the buttons */
+  width: min(100%, calc((100vh - 170px) * 10 / 7));
+  width: min(100%, calc((100dvh - 170px) * 10 / 7));
+  border-width: 6px;
+}
+.play-area.is-full .run-bar { justify-content: center; }
+.play-area.is-full .run-tip, .play-area.is-full .full-opt, .play-area.is-full .speed { display: none !important; }
+.play-area.is-full .hud { font-size: 22px; }
+.play-area.is-full .keypad button { width: 68px; height: 56px; font-size: 24px; }
+.play-area.is-full .keypad button.space { width: 110px; font-size: 18px; }
+
 /* ---------- Maker panels ---------- */
 .panel {
   background: var(--panel);

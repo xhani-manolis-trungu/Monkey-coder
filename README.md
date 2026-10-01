@@ -30,6 +30,7 @@ Start from a story template (**Banana Party**, **Space Rescue**, **Ocean Treasur
 - **Click a character** to see its code, and drag blocks in to give it behaviour.
 - **Move characters** by dragging them around the stage. Mark any of them as a 🧱 wall.
 - Press **▶ Run** and play with the arrow keys (or the on-screen arrows on tablets).
+- Tick **⛶ Play full screen when I press Run** (under the stage) to make the stage fill the whole screen every time a game starts, or press **⛶** any time. Press **Esc** or **✕ Exit** to come back. This works in both modes.
 - Games are saved automatically. **Save to file** / **Open file** lets kids keep or share a game (`.monkey.json`).
 
 ## The blocks
