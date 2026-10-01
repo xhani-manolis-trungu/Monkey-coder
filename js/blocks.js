@@ -45,7 +45,7 @@
   // hat: starts a script.  c: has a mouth for other blocks.  cap: nothing can go below it.
   MC.BLOCKS = {
     on_start: { cat: 'events', hat: true, label: 'when ▶ Run clicked', help: 'Starts when you press Run.' },
-    on_key: { cat: 'events', hat: true, label: 'when {key} key pressed', args: { key: { type: 'key', def: 'right' } }, help: 'Starts when a key (or an on-screen arrow) is pressed.' },
+    on_key: { cat: 'events', hat: true, label: 'when {key} pressed', args: { key: { type: 'key', def: 'right' } }, help: 'Starts when a key (or an on-screen arrow) is pressed.' },
     on_touch: { cat: 'events', hat: true, label: 'when I touch {kind}', args: { kind: { type: 'kind', def: 'banana' } }, help: 'Starts when this picture bumps into another one.' },
     on_timer: { cat: 'events', hat: true, label: 'every {n} seconds', args: { n: { type: 'num', def: 1, min: 0.2, max: 60 } }, help: 'Starts again and again on a timer.' },
 
@@ -69,14 +69,50 @@
     if_touching: { cat: 'control', c: true, label: 'if touching {kind}', args: { kind: { type: 'kind', def: 'banana' } }, help: 'Only do the blocks inside if touching something.' },
     if_score: { cat: 'control', c: true, label: 'if score ≥ {n}', args: { n: { type: 'num', def: 5, min: 0, max: 999 } }, help: 'Only do the blocks inside if the score is big enough.' },
 
-    collect: { cat: 'game', label: 'collect it ✨', help: 'Make the thing you touched disappear.' },
+    collect: { cat: 'game', label: 'collect it', help: 'Make the thing you touched disappear.' },
     score: { cat: 'game', label: 'add {n} to score', args: { n: { type: 'num', def: 1, min: -99, max: 99 } }, help: 'Change the score.' },
     sound: { cat: 'game', label: 'play sound {sound}', args: { sound: { type: 'sound', def: 'pop' } }, help: 'Make a noise!' },
-    win: { cat: 'game', cap: true, label: 'you win! 🏆', help: 'The player wins the game.' },
-    lose: { cat: 'game', cap: true, label: 'game over 💥', help: 'The player loses the game.' }
+    win: { cat: 'game', cap: true, label: 'you win!', help: 'The player wins the game.' },
+    lose: { cat: 'game', cap: true, label: 'game over', help: 'The player loses the game.' }
   };
 
   MC.BLOCK_ORDER = Object.keys(MC.BLOCKS);
+
+  // A picture on every block, so children can tell what it does before they can read it well.
+  MC.BLOCK_ICONS = {
+    on_start: '🏁',
+    on_key: '⌨️',
+    on_touch: '🤝',
+    on_timer: '⏰',
+    move: '👣',
+    turn: function (args) { return args && args.dir === 'right' ? '↪️' : '↩️'; },
+    jump: '🦘',
+    step: '👟',
+    chase: '🎯',
+    wander: '🎲',
+    goto_random: '🔀',
+    speed: '⏱️',
+    say: '💬',
+    hide: '🙈',
+    show: '👀',
+    spin: '🌀',
+    repeat: '🔁',
+    forever: '♾️',
+    wait: '⏳',
+    if_touching: '🤔',
+    if_score: '🏅',
+    collect: '🧺',
+    score: '➕',
+    sound: '🔊',
+    win: '🏆',
+    lose: '💥'
+  };
+
+  /** The icon for a block (some icons follow the block's setting, like turn left / right). */
+  MC.blockIcon = function (block) {
+    var icon = MC.BLOCK_ICONS[block.type];
+    return typeof icon === 'function' ? icon(block.args) : (icon || '');
+  };
 
   var counter = 0;
   MC.uid = function (prefix) {

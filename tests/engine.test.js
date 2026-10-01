@@ -146,3 +146,10 @@ test('blocks joined to the right are kept when loading and run in chain order', 
   assert.strictEqual(engine.score, 11);
   assert.strictEqual(engine.sprites[0].visible, false);
 });
+
+test('every block has an icon, and turn shows which way it turns', () => {
+  MC.BLOCK_ORDER.forEach((type) => {
+    assert.ok(MC.blockIcon(MC.newBlock(type)), type + ' needs an icon');
+  });
+  assert.notStrictEqual(MC.blockIcon({ type: 'turn', args: { dir: 'left' } }), MC.blockIcon({ type: 'turn', args: { dir: 'right' } }));
+});

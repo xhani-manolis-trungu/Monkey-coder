@@ -485,7 +485,7 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   gap: 4px;
 }
 .cat-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-.palette { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 12px 40px; }
+.palette { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 6px 40px 9px; }
 .palette-heading { font-weight: 800; margin: 10px 0 2px; font-size: 15px; }
 .palette-item { margin: 6px 0 12px; }
 .palette .block-input { pointer-events: none; }
@@ -673,6 +673,19 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   border-radius: 0 8px 8px 8px;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
 }
+.block-icon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  line-height: 1;
+}
 .block-input {
   border: 0;
   border-radius: 999px;
@@ -687,7 +700,7 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   cursor: text;
 }
 select.block-input { cursor: pointer; padding-right: 4px; max-width: 160px; text-overflow: ellipsis; }
-.palette select.block-input { max-width: 96px; }
+.palette select.block-input { max-width: 84px; }
 .block-input:focus { outline: 3px solid rgba(255, 255, 255, 0.7); }
 input[type="number"].block-input { -moz-appearance: textfield; appearance: textfield; min-width: 3.2ch; }
 input[type="number"].block-input::-webkit-inner-spin-button,
