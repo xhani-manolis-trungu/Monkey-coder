@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monkey Coder</title>
+  <meta name="description" content="A no-code game maker for kids: snap logic blocks together and drag pictures onto the stage to build little games.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐒</text></svg>">
+</head>
+<body data-mode="story">
+  <header class="topbar">
+    <button class="brand" id="btn-home" type="button" title="Home"><span class="brand-logo">🐒</span> Monkey Coder</button>
+    <nav class="modes" aria-label="Mode">
+      <button type="button" class="mode-btn" data-mode="story">📖 <span>Story Adventure</span></button>
+      <button type="button" class="mode-btn" data-mode="maker">🎨 <span>Game Maker</span></button>
+    </nav>
+    <div class="top-actions">
+      <button type="button" class="icon-btn" id="btn-help" title="How to play">❓</button>
+      <button type="button" class="icon-btn" id="btn-sound" title="Sound on/off">🔊</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <!-- LEFT: the stage -->
+    <section class="stage-col">
+      <!-- Story card (Story mode) -->
+      <div class="story-card story-only">
+        <div class="story-avatar">🐒</div>
+        <div class="story-text">
+          <div class="story-chapter" id="story-chapter">Chapter 1</div>
+          <h1 class="story-title" id="story-title">Hungry Monkey</h1>
+          <p id="story-body"></p>
+          <div class="story-goal">🎯 <span id="story-goal"></span></div>
+          <div class="story-hint" id="story-hint" hidden></div>
+        </div>
+        <button type="button" class="hint-btn" id="btn-hint">💡 Hint</button>
+      </div>
+      <div class="levels story-only" id="levels" aria-label="Chapters"></div>
+
+      <!-- Game info (Game Maker) -->
+      <div class="maker-card maker-only">
+        <div class="maker-row">
+          <input id="game-title" class="title-input" maxlength="40" aria-label="Game name" placeholder="My Game">
+          <label class="bg-pick">🖼️ <select id="bg-select" aria-label="Background"></select></label>
+        </div>
+        <textarea id="game-story" class="story-input" rows="2" maxlength="300" aria-label="Your story" placeholder="Write the story of your game…"></textarea>
+        <div class="maker-row file-row">
+          <button type="button" class="pill" id="btn-new">✨ New game</button>
+          <button type="button" class="pill" id="btn-export">💾 Save to file</button>
+          <button type="button" class="pill" id="btn-import">📂 Open file</button>
+        </div>
+      </div>
+
+      <div class="stage-wrap" id="stage-wrap">
+        <canvas id="stage" width="640" height="448" aria-label="Game stage"></canvas>
+        <div class="hud" id="hud" hidden></div>
+        <div class="drop-hint maker-only" id="drop-hint" hidden>Drop it here!</div>
+        <div class="overlay" id="overlay" hidden>
+          <div class="overlay-card">
+            <div class="overlay-icon" id="overlay-icon">🎉</div>
+            <h2 id="overlay-title">You did it!</h2>
+            <div class="overlay-stars" id="overlay-stars"></div>
+            <p id="overlay-text"></p>
+            <div class="overlay-actions" id="overlay-actions"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="run-bar">
+        <button type="button" class="run-btn" id="btn-run">▶ Run</button>
+        <button type="button" class="pill" id="btn-reset" title="Put everything back">↺ Reset</button>
+        <label class="speed story-only" title="Speed">🐢 <input type="range" id="speed" min="0" max="2" step="1" value="1" aria-label="Speed"> 🐇</label>
+        <span class="run-tip maker-only" id="run-tip">Tip: click a picture to see its code</span>
+      </div>
+
+      <div class="keypad maker-only" id="keypad" hidden>
+        <button type="button" data-key="left" aria-label="Left">◀</button>
+        <button type="button" data-key="up" aria-label="Up">▲</button>
+        <button type="button" data-key="down" aria-label="Down">▼</button>
+        <button type="button" data-key="right" aria-label="Right">▶</button>
+        <button type="button" data-key="space" class="space" aria-label="Space">space</button>
+      </div>
+
+      <div class="panel maker-only">
+        <h3 class="panel-title">🎭 Characters in your game</h3>
+        <div class="sprite-list" id="sprite-list"></div>
+        <div class="sprite-props" id="sprite-props"></div>
+      </div>
+
+      <div class="panel maker-only">
+        <h3 class="panel-title">🖼️ Pictures <small>drag onto the stage (or tap)</small></h3>
+        <div class="gallery-tabs" id="gallery-tabs"></div>
+        <div class="gallery" id="gallery"></div>
+        <button type="button" class="pill upload-btn" id="btn-upload">📷 Add my own picture</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: blocks and code -->
+    <section class="code-col">
+      <div class="palette-wrap" id="palette-wrap">
+        <div class="palette-cats" id="palette-cats"></div>
+        <div class="palette" id="palette"></div>
+      </div>
+      <div class="ws-wrap">
+        <div class="ws-header">
+          <span class="ws-who">Code for <b id="ws-sprite">🐒 Momo</b></span>
+          <span class="ws-tip">drag blocks in · drag them back out to remove</span>
+          <button type="button" class="pill small" id="btn-tidy" title="Tidy up">🧹 Tidy</button>
+        </div>
+        <div class="workspace" id="workspace">
+          <div class="ws-canvas" id="ws-canvas"></div>
+          <div class="ws-empty" id="ws-empty">Drag blocks from the left and snap them together here 👈</div>
+          <div class="ws-locked-msg" id="ws-locked-msg">⏳ Running… press Stop to change the code</div>
+        </div>
+        <div class="trash" id="trash" title="Drop here to delete">🗑️</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Dialogs -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <input type="file" id="file-image" accept="image/*" hidden>
+  <input type="file" id="file-project" accept=".json,application/json" hidden>
+
+  <script src="js/assets.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/blocks.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/stage.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
