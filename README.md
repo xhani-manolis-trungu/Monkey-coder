@@ -18,6 +18,8 @@ A 6-chapter story about Momo the monkey. Each chapter puts a puzzle on the stage
 | 5. Sleepy Crocodile | `jump` over danger |
 | 6. Crocodile River | loops + jumping together |
 
+The first time a child opens Chapter 1, a **guided tour** walks them through it. The page dims, a glowing spotlight with soft bokeh lights glides to each thing they need to use, and a pretend hand pointer shows what to do (it even demonstrates dragging a block). Steps that ask the child to act wait until they've done it. They can replay it any time with **🧭 Show me how**.
+
 Shorter programs earn more ⭐ stars, the same idea CodeMonkey uses to encourage loops. Blocks light up while they run, so kids can see what their code is doing. Progress is saved in the browser.
 
 ### 🎨 Game Maker
@@ -54,6 +56,7 @@ js/levels.js      Story Adventure chapters (maps are drawn as text)
 js/templates.js   Game Maker starter games
 js/stage.js       draws the world on a <canvas>
 js/editor.js      drag-and-drop block editor (Pointer Events: mouse + touch)
+js/tour.js        guided tour (spotlight, bokeh, pretend hand pointer)
 js/app.js         ties everything together
 tests/            engine tests
 ```

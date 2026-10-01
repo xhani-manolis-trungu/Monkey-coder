@@ -112,8 +112,12 @@
       b.classList.toggle('active', b.dataset.mode === mode);
     });
     save('mode', mode);
-    if (mode === 'story') loadLevel(state.levelIndex);
-    else loadMaker();
+    if (mode === 'story') {
+      loadLevel(state.levelIndex);
+      maybeStartTour();
+    } else {
+      loadMaker();
+    }
   }
 
   /* ---------- Story Adventure ---------- */
@@ -145,6 +149,7 @@
     $('story-goal').textContent = lv.goal;
     $('story-hint').textContent = '💡 ' + lv.hint;
     $('story-hint').hidden = true;
+    $('btn-guide').hidden = state.levelIndex !== 0;
     renderLevels();
   }
 
@@ -763,7 +768,127 @@
         '💾 Your work is saved in this browser automatically. Use “Save to file” to keep a copy or share it.'
       ].forEach(function (line) { ul.appendChild(h('li', null, line)); });
       c.appendChild(ul);
+      var guide = h('button', 'pill', '🧭 Show me how, step by step');
+      guide.type = 'button';
+      guide.addEventListener('click', startTour);
+      c.appendChild(guide);
     });
+  }
+
+  /* ---------- guided tour for the very first chapter ---------- */
+
+  var booting = true;
+  var tour = new MC.Tour({ onEnd: function () { save('tourDone', true); } });
+
+  function q(sel) { return document.querySelector(sel); }
+
+  function heroHasMove() {
+    var h0 = hero();
+    return !!h0 && h0.scripts.some(function (st) {
+      return st.blocks[0] && st.blocks[0].type === 'on_start' && st.blocks.some(function (b) { return b.type === 'move'; });
+    });
+  }
+
+  // The "move" block that is snapped under the start block.
+  function attachedMove() { return q('#ws-canvas .block.hat ~ .block.cat-motion'); }
+
+  // The square on the stage where a sprite stands.
+  function cellRect(sprite) {
+    var r = $('stage').getBoundingClientRect();
+    var c = r.width / state.project.cols;
+    return { x: r.left + sprite.x * c, y: r.top + sprite.y * c, w: c, h: c };
+  }
+
+  function dropZone() {
+    var hat = q('#ws-canvas .block.hat');
+    if (!hat) return null;
+    var r = hat.getBoundingClientRect();
+    return { x: r.left, y: r.bottom + 2, w: Math.max(r.width, 170), h: 42 };
+  }
+
+  function level1Steps() {
+    return [
+      {
+        title: 'Hi! I’m Momo 🐒',
+        text: 'This card tells you my story. The green part is your goal 🎯: help me get the banana!',
+        holes: function () { return [q('.story-card')]; },
+        next: 'Next ▶'
+      },
+      {
+        title: 'This is the stage',
+        text: 'Here I am, and there’s the banana 🍌. The little orange arrow shows which way I’m looking.',
+        holes: function () { return [$('stage')]; },
+        pointAt: function () { return hero() && cellRect(hero()); },
+        next: 'Next ▶'
+      },
+      {
+        title: 'Drag the “move” block',
+        text: 'Press on the blue “move” block, hold it, and drag it right under “when ▶ Run clicked” until it snaps. Watch my hand!',
+        holes: function () { return [q('.palette .block'), dropZone()]; },
+        cursor: {
+          drag: {
+            from: function () { return q('.palette .block'); },
+            to: function () { var z = dropZone(); return z && { x: z.x + 30, y: z.y + 20 }; }
+          }
+        },
+        done: heroHasMove
+      },
+      {
+        title: 'How many steps?',
+        text: 'Count the squares from me to the banana: 1, 2, 3! Tap the number on the move block and change it to 3.',
+        holes: function () { return [attachedMove(), $('stage')]; },
+        pointAt: function () { var m = attachedMove(); return m && m.querySelector('input'); },
+        done: function () { var m = attachedMove(); var i = m && m.querySelector('input'); return !!i && i.value.trim() === '3'; }
+      },
+      {
+        title: 'Press Run!',
+        text: 'Now press ▶ Run and watch what I do.',
+        holes: function () { return [$('btn-run')]; },
+        done: function () { return !!state.engine; }
+      },
+      {
+        title: 'Watch me go! 👀',
+        text: 'Your code is running. The block that is working right now glows yellow.',
+        holes: function () { return [$('stage'), q('#ws-canvas .stack')]; },
+        pointAt: function () { return hero() && state.engine && cellRect(state.engine.byId.hero); },
+        done: function () { return !$('overlay').hidden; }
+      },
+      {
+        title: function () { return won() ? 'You did it! 🎉' : 'So close!'; },
+        text: function () {
+          return won()
+            ? 'Yum! You wrote your first program. Press “Next chapter ▶” whenever you’re ready for the next puzzle.'
+            : 'I didn’t reach the banana this time. Press “Try again”, check the number, and run it again. You can do it!';
+        },
+        holes: function () { return [q('#overlay .overlay-card')]; },
+        pointAt: function () { return q('#overlay-actions .go'); },
+        next: 'Finish 🎉',
+        done: function () { return $('overlay').hidden; }
+      }
+    ];
+  }
+
+  function won() { return !!state.engine && state.engine.status === 'win'; }
+
+  function startTour() {
+    if (!$('modal').hidden) closeModal();
+    state.levelIndex = 0;
+    if (state.mode !== 'story') {
+      state.mode = 'story';
+      document.body.dataset.mode = 'story';
+      document.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.mode === 'story'); });
+      save('mode', 'story');
+    }
+    // Start chapter 1 from a clean page so every step makes sense.
+    delete state.storyScripts[0];
+    save('story', state.storyScripts);
+    loadLevel(0);
+    tour.start(level1Steps());
+  }
+
+  function maybeStartTour() {
+    if (booting || tour.active || load('tourDone', false)) return;
+    if (state.mode === 'story' && state.levelIndex === 0 && $('modal').hidden) startTour();
   }
 
   /* ---------- wiring up buttons ---------- */
@@ -777,6 +902,7 @@
   $('btn-reset').addEventListener('click', stopGame);
   $('btn-tidy').addEventListener('click', function () { if (!editor.locked) editor.tidy(); });
   $('btn-hint').addEventListener('click', function () { $('story-hint').hidden = !$('story-hint').hidden; });
+  $('btn-guide').addEventListener('click', startTour);
   $('btn-new').addEventListener('click', showTemplates);
 
   var soundBtn = $('btn-sound');
@@ -905,8 +1031,10 @@
   var startMode = hash === 'maker' || hash === 'story' ? hash : load('mode', 'story');
   state.levelIndex = Math.min(unlockedUpTo(), MC.LEVELS.length - 1);
   setMode(startMode === 'maker' ? 'maker' : 'story');
+  booting = false;
   if (hash !== 'maker' && hash !== 'story') showWelcome();
+  else maybeStartTour();
   requestAnimationFrame(frame);
 
-  MC.app = { state: state, editor: editor, stage: stage, setMode: setMode, loadLevel: loadLevel, runGame: runGame, stopGame: stopGame };
+  MC.app = { state: state, tour: tour, startTour: startTour, editor: editor, stage: stage, setMode: setMode, loadLevel: loadLevel, runGame: runGame, stopGame: stopGame };
 })(window.MC = window.MC || {});
