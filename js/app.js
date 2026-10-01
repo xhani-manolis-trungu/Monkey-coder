@@ -363,9 +363,12 @@
     persist();
   }
 
-  function removeSprite(s) {
+  function removeSprite(s, confirmed) {
     var name = MC.imageInfo(s.kind, state.project).name;
-    if (s.scripts.length && !window.confirm('Remove the ' + name + ' and all of its code?')) return;
+    if (s.scripts.length && !confirmed) {
+      askConfirm('Remove the ' + name + '?', 'Its code will be removed too.', '🗑️ Yes, remove it', function () { removeSprite(s, true); });
+      return;
+    }
     var list = state.project.sprites;
     list.splice(list.indexOf(s), 1);
     MC.Sound.play('drum');
@@ -675,6 +678,28 @@
   $('modal-close').addEventListener('click', closeModal);
   $('modal').addEventListener('click', function (e) { if (e.target === $('modal')) closeModal(); });
 
+  /** A kid-friendly yes/no question (the browser's confirm() box is easy to miss). */
+  function askConfirm(title, text, yesLabel, onYes) {
+    openModal(function (c) {
+      var t = h('h2', null, title);
+      t.id = 'modal-title';
+      c.appendChild(t);
+      c.appendChild(h('p', 'lead', text));
+      var row = h('div', 'overlay-actions');
+      var yes = h('button', 'pill go', yesLabel);
+      yes.type = 'button';
+      yes.addEventListener('click', function () { closeModal(); onYes(); });
+      row.appendChild(yes);
+      if (yesLabel !== 'OK') {
+        var no = h('button', 'pill', 'No, keep it');
+        no.type = 'button';
+        no.addEventListener('click', closeModal);
+        row.appendChild(no);
+      }
+      c.appendChild(row);
+    });
+  }
+
   function choice(icon, title, text, onClick) {
     var b = h('button', 'choice');
     b.type = 'button';
@@ -805,7 +830,7 @@
       loadMaker();
       persist();
     }).catch(function () {
-      window.alert('Oops! That file is not a Monkey Coder game.');
+      askConfirm('Oops!', 'That file is not a Monkey Coder game. Game files end in .monkey.json', 'OK', function () {});
     });
   });
 
