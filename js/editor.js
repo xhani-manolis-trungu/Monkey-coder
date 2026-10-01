@@ -102,7 +102,7 @@
       sEl.dataset.index = i;
       sEl.style.left = st.x + 'px';
       sEl.style.top = st.y + 'px';
-      st.blocks.forEach(function (b) { sEl.appendChild(self.buildBlock(b, false)); });
+      sEl.appendChild(self.buildChain(st.blocks, false));
       self.canvasEl.appendChild(sEl);
       maxX = Math.max(maxX, st.x);
       maxY = Math.max(maxY, st.y);
@@ -163,6 +163,27 @@
 
   /* ---------- building block elements ---------- */
 
+  /**
+   * Draw a list of blocks as a chain. Each block sits under the one before it,
+   * or to its right when it has join: 'right'. They still run in list order.
+   */
+  Editor.prototype.buildChain = function (list, inPalette) {
+    var self = this;
+    function segment(i) {
+      var bEl = self.buildBlock(list[i], inPalette);
+      if (i === list.length - 1) return bEl;
+      var right = list[i + 1].join === 'right';
+      if (right) bEl.classList.add('joins-right');
+      var seg = el('div', 'seg ' + (right ? 'seg-right' : 'seg-down'));
+      seg.appendChild(bEl);
+      seg.appendChild(segment(i + 1));
+      return seg;
+    }
+    var frag = document.createDocumentFragment();
+    if (list.length) frag.appendChild(segment(0));
+    return frag;
+  };
+
   Editor.prototype.buildBlock = function (block, inPalette) {
     var self = this;
     var def = MC.BLOCKS[block.type];
@@ -182,7 +203,7 @@
     b.appendChild(row);
     if (def.c) {
       var body = el('div', 'block-body');
-      (block.body || []).forEach(function (child) { body.appendChild(self.buildBlock(child, inPalette)); });
+      body.appendChild(this.buildChain(block.body || [], inPalette));
       b.appendChild(body);
       b.appendChild(el('div', 'block-foot'));
     }
@@ -325,6 +346,7 @@
       var canvasRect = this.canvasEl.getBoundingClientRect();
       origin = { x: rect.left - canvasRect.left, y: rect.top - canvasRect.top };
       group = r.list.splice(r.index);
+      delete group[0].join; // it is the start of its own chain now
       if (r.list === r.stack.blocks && r.list.length === 0) {
         this.stacks.splice(this.stacks.indexOf(r.stack), 1);
       }
@@ -332,7 +354,7 @@
     }
     var ghost = el('div', 'stack drag-ghost');
     var self = this;
-    group.forEach(function (b) { ghost.appendChild(self.buildBlock(b, false)); });
+    ghost.appendChild(this.buildChain(group, false));
     document.body.appendChild(ghost);
     this.drag = {
       group: group,
@@ -359,7 +381,11 @@
         if (!r) return;
         var def = MC.BLOCKS[r.block.type];
         var rect = bEl.getBoundingClientRect();
-        if (!def.cap) list.push({ x: rect.left, y: rect.bottom, kind: 'after', id: r.block.id });
+        if (!def.cap) {
+          list.push({ x: rect.left, y: rect.bottom, kind: 'after', id: r.block.id });
+          var row = bEl.querySelector(':scope > .block-row').getBoundingClientRect();
+          list.push({ x: rect.right, y: row.top, kind: 'right', id: r.block.id, h: row.height });
+        }
         if (def.c) {
           var body = bEl.querySelector(':scope > .block-body').getBoundingClientRect();
           list.push({ x: body.left, y: body.top, kind: 'inside', id: r.block.id });
@@ -438,8 +464,11 @@
     d.target = best;
     if (best) {
       var cr = this.canvasEl.getBoundingClientRect();
-      this.indicator.style.left = (best.x - cr.left) + 'px';
-      this.indicator.style.top = (best.kind === 'top' ? best.y + d.height - cr.top : best.y - cr.top) - 3 + 'px';
+      var side = best.kind === 'right';
+      this.indicator.classList.toggle('side', side);
+      this.indicator.style.left = (best.x - cr.left - (side ? 3 : 0)) + 'px';
+      this.indicator.style.top = (best.kind === 'top' ? best.y + d.height - cr.top : best.y - cr.top) - (side ? 0 : 3) + 'px';
+      this.indicator.style.height = side ? best.h + 'px' : '';
       if (!this.indicator.parentNode) this.canvasEl.appendChild(this.indicator);
     } else if (this.indicator.parentNode) {
       this.indicator.parentNode.removeChild(this.indicator);
@@ -463,8 +492,9 @@
       this.onSound('drum');
     } else if (over(this.wsEl, e.clientX, e.clientY)) {
       var t = d.target;
-      if (t && t.kind === 'after') {
+      if (t && (t.kind === 'after' || t.kind === 'right')) {
         var ra = this.find(t.id);
+        if (t.kind === 'right') d.group[0].join = 'right';
         ra.list.splice.apply(ra.list, [ra.index + 1, 0].concat(d.group));
       } else if (t && t.kind === 'inside') {
         var ri = this.find(t.id);

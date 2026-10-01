@@ -43,7 +43,7 @@ Start from a story template (**Banana Party**, **Space Rescue**, **Ocean Treasur
 | 🔁 Control | repeat [n] times · forever · wait [n] seconds · if touching [thing] · if score ≥ [n] |
 | 🏆 Game | collect it · add [n] to score · play sound · you win! · game over |
 
-Drag a block out of the code area (back to the block box or onto the 🗑️) to delete it. Dropping a block under, inside or on top of another one snaps it into place.
+Drag a block out of the code area (back to the block box or onto the 🗑️) to delete it. Dropping a block under, to the right of, inside or on top of another one snaps it into place. A script can grow sideways as well as down, like a chain: it runs in chain order, from the first block to the last, whether each one is attached underneath or to the right.
 
 Scripts can go anywhere in the code area: drag a script by its top block and drop it where you like. It lands on the nearest dot so scripts line up, and the code area scrolls by itself when you drag near its edge. The **Arrange** buttons line all scripts up for you: **⬇** one under another, **➡** side by side, or **▦** as a grid that fills the space.
 

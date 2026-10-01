@@ -512,7 +512,7 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   flex-wrap: wrap;
 }
 .ws-who { font-size: 17px; }
-.ws-tip { color: var(--muted); font-size: 13px; flex: 1; }
+.ws-tip { color: var(--muted); font-size: 13px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .arrange {
   display: flex;
   align-items: center;
@@ -629,6 +629,23 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   z-index: 2;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18);
 }
+/* chains: a block can sit under the one before it, or to its right */
+.seg { display: flex; align-items: flex-start; }
+.seg-down { flex-direction: column; }
+.seg-right { flex-direction: row; }
+.block.joins-right::after { display: none; }
+.block.joins-right > .block-row::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  top: 50%;
+  margin-top: -9px;
+  width: 8px;
+  height: 18px;
+  background: var(--c);
+  border-radius: 0 6px 6px 0;
+  z-index: 2;
+}
 .cat-events { color: #3d2a00; }
 .hat > .block-row { border-radius: 22px 22px 8px 8px; padding-top: 12px; }
 .hat::before {
@@ -678,6 +695,7 @@ input[type="number"].block-input::-webkit-outer-spin-button { -webkit-appearance
 .block.running > .block-row { box-shadow: 0 0 0 3px #fff, 0 0 14px 6px #ffd400; }
 .drag-ghost { position: fixed; z-index: 1000; pointer-events: none; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.3)); }
 .drag-ghost.deleting { opacity: 0.35; }
+.snap-indicator.side { width: 6px; }
 .snap-indicator {
   position: absolute;
   width: 120px;

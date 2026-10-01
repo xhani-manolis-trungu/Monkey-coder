@@ -129,3 +129,20 @@ test('repairProject rejects junk and keeps valid content', () => {
   assert.deepStrictEqual([p.sprites[0].x, p.sprites[0].y], [9, 0]);
   assert.deepStrictEqual(p.sprites[0].scripts[0].blocks.map((b) => b.type), ['on_start', 'say']);
 });
+
+test('blocks joined to the right are kept when loading and run in chain order', () => {
+  const p = MC.repairProject({
+    sprites: [
+      { id: 'u', kind: 'unicorn', x: 1, y: 1, scripts: [{ x: 0, y: 0, blocks: [
+        { type: 'on_start' },
+        { type: 'score', args: { n: 1 }, join: 'right' },
+        { type: 'score', args: { n: 10 }, join: 'sideways?' },
+        { type: 'hide' }
+      ] }] }
+    ]
+  });
+  assert.deepStrictEqual(p.sprites[0].scripts[0].blocks.map((b) => b.join || '-'), ['-', 'right', '-', '-']);
+  const engine = run(p);
+  assert.strictEqual(engine.score, 11);
+  assert.strictEqual(engine.sprites[0].visible, false);
+});

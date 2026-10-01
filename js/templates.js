@@ -207,6 +207,7 @@
   function cleanBlocks(list) {
     return (list || []).filter(function (b) { return b && MC.BLOCKS[b.type]; }).map(function (b) {
       var out = { id: b.id, type: b.type, args: {} };
+      if (b.join === 'right') out.join = 'right';
       var def = MC.BLOCKS[b.type];
       Object.keys(def.args || {}).forEach(function (k) {
         if (b.args && b.args[k] !== undefined) out.args[k] = typeof b.args[k] === 'number' ? b.args[k] : String(b.args[k]).slice(0, 60);
