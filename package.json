@@ -1,11 +1,50 @@
 {
   "name": "monkey-coder",
+  "productName": "Monkey Coder",
   "version": "1.0.0",
   "description": "A no-code game maker for kids: snap logic blocks together and drag pictures onto the stage.",
+  "author": "Manolis Trungu",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "start": "npx --yes serve .",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "app": "electron .",
+    "dist": "electron-builder --win"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "build": {
+    "appId": "io.github.monkeycoder",
+    "productName": "Monkey Coder",
+    "copyright": "Copyright © 2026 Manolis Trungu",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "css/**",
+      "js/**",
+      "fonts/**",
+      "electron/**",
+      "build/icon.png"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "artifactName": "Monkey-Coder-Setup-${version}.${ext}",
+      "shortcutName": "Monkey Coder"
+    },
+    "portable": {
+      "artifactName": "Monkey-Coder-Portable-${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  }
 }

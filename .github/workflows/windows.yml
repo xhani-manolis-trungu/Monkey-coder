@@ -1,0 +1,62 @@
+name: Windows app
+
+# Builds the Windows desktop app (Electron) and keeps the .exe files as a
+# download on the workflow run. Pushing a tag like v1.2.0 also publishes them
+# on a GitHub Release, with that version number.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Windows .exe
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+        env:
+          # electron-builder downloads the Windows Electron it needs by itself.
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      - name: Run tests
+        run: npm test
+      - name: Use the tag as the version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: npm pkg set version="${GITHUB_REF_NAME#v}"
+      - name: Build installer and portable app
+        run: npm run dist -- --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Monkey-Coder-Windows
+          path: dist/*.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Monkey-Coder-Windows
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
+          generate_release_notes: true
