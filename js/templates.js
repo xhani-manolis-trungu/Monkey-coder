@@ -22,9 +22,9 @@
   function height(blocks) {
     return (blocks || []).reduce(function (sum, b) {
       var def = MC.BLOCKS[b.type];
-      if (def.hat) return sum + 52;
-      if (def.c) return sum + 74 + Math.max(30, height(b.body));
-      return sum + 40;
+      if (def.hat) return sum + 66;
+      if (def.c) return sum + 90 + Math.max(38, height(b.body));
+      return sum + 54;
     }, 0);
   }
 

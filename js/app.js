@@ -853,7 +853,7 @@
     var hat = q('#ws-canvas .block.hat');
     if (!hat) return null;
     var r = hat.getBoundingClientRect();
-    return { x: r.left, y: r.bottom + 2, w: Math.max(r.width, 170), h: 42 };
+    return { x: r.left, y: r.bottom + 2, w: Math.max(r.width, 200), h: 56 };
   }
 
   function level1Steps() {
@@ -878,7 +878,7 @@
         cursor: {
           drag: {
             from: function () { return q('.palette .block'); },
-            to: function () { var z = dropZone(); return z && { x: z.x + 30, y: z.y + 20 }; }
+            to: function () { var z = dropZone(); return z && { x: z.x + 36, y: z.y + 27 }; }
           }
         },
         done: heroHasMove
