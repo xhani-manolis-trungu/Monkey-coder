@@ -2,7 +2,7 @@
 
 A no-code programming game for kids, inspired by CodeMonkey. Children snap colourful **logic blocks** together and drag **pictures** onto a stage to solve story puzzles and build their own little games. No typing needed.
 
-It's plain HTML, CSS and JavaScript: no build step, no server and no image files (all pictures are emoji). **Just open `index.html` in a browser.** It works with a mouse or on a tablet with touch.
+It's plain HTML, CSS and JavaScript: no build step, no server and no image files (all pictures are emoji). **Just open `index.html` in a browser.** It works with a mouse or on a tablet with touch, and there's also a [Windows desktop app](#windows-desktop-app).
 
 ## Two ways to play
 
@@ -64,6 +64,9 @@ js/editor.js      drag-and-drop block editor (Pointer Events: mouse + touch)
 js/tour.js        guided tour (spotlight, bokeh, pretend hand pointer)
 js/app.js         ties everything together
 tests/            engine tests
+fonts/            Baloo 2 font, shipped with the app so it works offline
+electron/main.js  Windows desktop app window (Electron)
+build/icon.png    desktop app icon
 ```
 
 ### Adding a story chapter
@@ -74,6 +77,26 @@ Add an entry to `MC.LEVELS` in `js/levels.js`. Maps are 10×7 text grids: `M` mo
 ```bash
 npm test     # runs the engine tests with Node's built-in test runner
 npm start    # optional: serve the folder at http://localhost:3000
+npm run app  # optional: run it as a desktop app (after npm install)
 ```
 
 The same tests run on GitHub Actions for every pull request and every push to `main` (`.github/workflows/test.yml`).
+
+## Windows desktop app
+
+The same game also comes as a Windows program, built with [Electron](https://www.electronjs.org/). It runs the same `index.html` in its own window, so it needs nothing else installed and works without the internet.
+
+- **Get it:** open the **Windows app** workflow run on GitHub Actions and download **Monkey-Coder-Windows**. Every push to `main` and every pull request builds it. Pushing a tag such as `v1.1.0` also attaches the files to a GitHub Release with that version number.
+- `Monkey-Coder-Setup-<version>.exe` installs the app with Start menu and desktop shortcuts. It doesn't need administrator rights.
+- `Monkey-Coder-Portable-<version>.exe` runs straight away without installing, from a USB stick for example.
+
+The app isn't code-signed, so the first time it runs Windows may show **“Windows protected your PC”**. Click **More info → Run anyway**. Removing this warning needs a code-signing certificate (electron-builder can use one through its `CSC_LINK` and `CSC_KEY_PASSWORD` settings).
+
+How it differs from the browser version:
+
+- Progress and games are saved inside the app (in `%APPDATA%\Monkey Coder`), not in the browser.
+- **💾 Save to file** opens a normal Windows *Save as* box, starting in *Documents*.
+- There's no menu bar. **F11** toggles full screen, and **Ctrl +**, **Ctrl −** and **Ctrl 0** zoom.
+- The window can only show the game: links to websites open in the normal browser.
+
+To build it yourself on Windows: `npm install`, then `npm run dist`. The `.exe` files appear in `dist/`. The app icon is the 🐒 from [Noto Color Emoji](https://github.com/googlefonts/noto-emoji) (SIL Open Font License).
