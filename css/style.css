@@ -119,7 +119,7 @@ body.dragging-blocks, body.dragging-blocks * { cursor: grabbing !important; user
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(380px, 44%) 1fr;
+  grid-template-columns: minmax(360px, 41%) 1fr;
   gap: 14px;
   padding: 14px;
   -webkit-user-select: none;
@@ -137,7 +137,7 @@ body.dragging-blocks, body.dragging-blocks * { cursor: grabbing !important; user
 .code-col {
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(220px, 270px) 1fr;
+  grid-template-columns: minmax(250px, 320px) 1fr;
   gap: 12px;
 }
 
@@ -597,7 +597,7 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   position: relative;
   color: #fff;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 17px;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
@@ -608,11 +608,11 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--c);
-  padding: 6px 12px;
-  min-height: 38px;
-  border-radius: 8px;
+  padding: 7px 14px;
+  min-height: 54px;
+  border-radius: 10px;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
   white-space: nowrap;
 }
@@ -620,12 +620,12 @@ body[data-mode="maker"] #stage { cursor: pointer; }
 .block:not(.cap)::after {
   content: "";
   position: absolute;
-  left: 16px;
-  bottom: -7px;
-  width: 22px;
-  height: 8px;
+  left: 20px;
+  bottom: -8px;
+  width: 26px;
+  height: 9px;
   background: var(--c);
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 7px 7px;
   z-index: 2;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18);
 }
@@ -637,60 +637,60 @@ body[data-mode="maker"] #stage { cursor: pointer; }
 .block.joins-right > .block-row::after {
   content: "";
   position: absolute;
-  right: -7px;
+  right: -8px;
   top: 50%;
-  margin-top: -9px;
-  width: 8px;
-  height: 18px;
+  margin-top: -11px;
+  width: 9px;
+  height: 22px;
   background: var(--c);
   border-radius: 0 6px 6px 0;
   z-index: 2;
 }
 .cat-events { color: #3d2a00; }
-.hat > .block-row { border-radius: 22px 22px 8px 8px; padding-top: 12px; }
+.hat > .block-row { border-radius: 24px 24px 10px 10px; padding-top: 12px; }
 .hat::before {
   content: "";
   position: absolute;
-  top: -6px; left: 10px;
-  width: 70px; height: 20px;
+  top: -7px; left: 12px;
+  width: 84px; height: 22px;
   background: var(--c);
   border-radius: 50%;
 }
-.cblock > .block-row { border-radius: 8px 8px 8px 0; }
+.cblock > .block-row { border-radius: 10px 10px 10px 0; }
 .block-body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  border-left: 16px solid var(--c);
-  min-height: 30px;
-  padding: 4px 0 8px;
-  min-width: 60px;
+  border-left: 20px solid var(--c);
+  min-height: 38px;
+  padding: 5px 0 9px;
+  min-width: 70px;
 }
 .block-foot {
-  height: 18px;
-  width: 100px;
+  height: 20px;
+  width: 120px;
   background: var(--c);
-  border-radius: 0 8px 8px 8px;
+  border-radius: 0 10px 10px 10px;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
 }
 .block-icon {
   flex: none;
-  width: 28px;
-  height: 28px;
-  margin-left: -6px;
+  width: 42px;
+  height: 42px;
+  margin-left: -7px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.15);
   display: grid;
   place-items: center;
-  font-size: 17px;
+  font-size: 27px;
   line-height: 1;
 }
 .block-input {
   border: 0;
   border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 15px;
+  padding: 3px 10px;
+  font-size: 17px;
   font-weight: 700;
   color: #2d2a32;
   background: #fff;
@@ -700,7 +700,8 @@ body[data-mode="maker"] #stage { cursor: pointer; }
   cursor: text;
 }
 select.block-input { cursor: pointer; padding-right: 4px; max-width: 160px; text-overflow: ellipsis; }
-.palette select.block-input { max-width: 84px; }
+.palette select.block-input { max-width: 112px; }
+.palette .hat select.block-input { max-width: 100px; }
 .block-input:focus { outline: 3px solid rgba(255, 255, 255, 0.7); }
 input[type="number"].block-input { -moz-appearance: textfield; appearance: textfield; min-width: 3.2ch; }
 input[type="number"].block-input::-webkit-inner-spin-button,

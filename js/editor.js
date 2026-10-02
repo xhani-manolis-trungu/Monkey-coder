@@ -5,7 +5,7 @@
 (function (MC) {
   'use strict';
 
-  var SNAP_DISTANCE = 34;
+  var SNAP_DISTANCE = 44; // forgiving, for small hands and big blocks
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
