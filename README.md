@@ -2,7 +2,7 @@
 
 A no-code programming game for kids, inspired by CodeMonkey. Children snap colourful **logic blocks** together and drag **pictures** onto a stage to solve story puzzles and build their own little games. No typing needed.
 
-It's plain HTML, CSS and JavaScript: no build step, no server and no image files (all pictures are emoji). **Just open `index.html` in a browser.** It works with a mouse or on a tablet with touch, and there's also a [Windows desktop app](#windows-desktop-app).
+It's plain HTML, CSS and JavaScript: no build step, no server and no image files (all pictures are emoji). **Just open `index.html` in a browser.** It works with a mouse or on a tablet with touch. It can be [installed on Android phones and tablets](#install-on-android-and-iphone-pwa), and there's also a [Windows desktop app](#windows-desktop-app).
 
 ## Two ways to play
 
@@ -63,6 +63,7 @@ js/stage.js       draws the world on a <canvas>
 js/editor.js      drag-and-drop block editor (Pointer Events: mouse + touch)
 js/tour.js        guided tour (spotlight, bokeh, pretend hand pointer)
 js/app.js         ties everything together
+manifest.webmanifest, sw.js, icons/   installable app (PWA)
 tests/            engine tests
 fonts/            Baloo 2 font, shipped with the app so it works offline
 electron/main.js  Windows desktop app window (Electron)
@@ -81,6 +82,23 @@ npm run app  # optional: run it as a desktop app (after npm install)
 ```
 
 The same tests run on GitHub Actions for every pull request and every push to `main` (`.github/workflows/test.yml`).
+
+## Install on Android (and iPhone): PWA
+
+Monkey Coder is an installable web app (a *PWA*). On a phone or tablet it gets its own home-screen icon, opens full screen without the browser's address bar, and keeps working with no internet.
+
+**Play or install it:** https://xhani-manolis-trungu.github.io/Monkey-coder/
+
+- **Android (Chrome):** open the link and press **📲 Install** at the top of the game, or Chrome's **⋮** menu → **Install app** / **Add to Home screen**.
+- **iPhone / iPad (Safari):** open the link, press **Share** → **Add to Home Screen**.
+
+Updates arrive by themselves: the app checks for a new version in the background and uses it the next time it's opened.
+
+How it works: `manifest.webmanifest` gives the app its name, colours and icons (`icons/`, including a *maskable* icon that Android shapes into a circle or squircle). `sw.js` is a service worker that keeps a copy of every file on the device; `tests/pwa.test.js` makes sure its file list matches what the page loads. The **Website** workflow (`.github/workflows/pages.yml`) publishes the game to GitHub Pages on every push to `main`.
+
+One-time setup for GitHub Pages: in the repository's **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**.
+
+To try the installable version on your own computer, serve the folder (`npm start`) and open it at `http://localhost:3000`. Service workers don't run when `index.html` is opened directly as a file.
 
 ## Windows desktop app
 

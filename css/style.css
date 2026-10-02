@@ -133,6 +133,19 @@ body.dragging-blocks, body.dragging-blocks * { cursor: grabbing !important; user
   font-size: 18px;
 }
 .icon-btn:hover { background: rgba(255, 255, 255, 0.32); }
+.install-btn {
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--header-b);
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.install-btn:hover { background: #fff5e1; }
+@media (max-width: 520px) { .install-btn span { display: none; } .install-btn { width: 40px; padding: 0; } }
 
 /* ---------- Layout ---------- */
 .app {
