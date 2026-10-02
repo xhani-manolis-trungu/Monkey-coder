@@ -815,7 +815,8 @@
         '🎨 In Game Maker, drag pictures onto the stage. Click a character to see and change its code.',
         '⌨️ When your game is running, use the arrow keys (or the blue buttons under the stage).',
         '📷 You can also add your own drawings or photos with “Add my own picture”, or drop picture files onto the stage.',
-        '💾 Your work is saved in this browser automatically. Use “Save to file” to keep a copy or share it.'
+        '💾 Your work is saved in this browser automatically. Use “Save to file” to keep a copy or share it.',
+        '📲 On an Android phone or tablet, press “Install” at the top (or Chrome’s ⋮ menu → “Install app”) to put Monkey Coder on your home screen. It works without internet too. On an iPhone or iPad: Share → “Add to Home Screen”.'
       ].forEach(function (line) { ul.appendChild(h('li', null, line)); });
       c.appendChild(ul);
       var guide = h('button', 'pill', '🧭 Show me how, step by step');
@@ -1046,6 +1047,42 @@
     b.addEventListener('pointerleave', release);
     b.addEventListener('pointercancel', release);
   });
+
+  /* ---------- install as an app (PWA) ---------- */
+
+  var installPrompt = null;
+  var installBtn = $('btn-install');
+
+  function runningAsApp() {
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  }
+
+  // Chrome on Android (and desktop) tells us when the game can be installed.
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    installPrompt = e;
+    installBtn.hidden = runningAsApp();
+  });
+  installBtn.addEventListener('click', function () {
+    if (!installPrompt) return;
+    var p = installPrompt;
+    installPrompt = null;
+    installBtn.hidden = true;
+    p.prompt();
+  });
+  window.addEventListener('appinstalled', function () {
+    installPrompt = null;
+    installBtn.hidden = true;
+    MC.Sound.play('win');
+  });
+
+  // Keep a copy of the game on the device so the installed app works offline.
+  // Only on a real website: not when opened as a file or inside the Windows app.
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* the game works without it */ });
+    });
+  }
 
   /* ---------- animation loop ---------- */
 
