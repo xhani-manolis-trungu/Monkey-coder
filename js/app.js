@@ -97,7 +97,9 @@
   }
 
   function onCodeChange() {
-    stopGame();
+    // In Story Adventure a finished run stays on the stage while the code is changed,
+    // so the child can see where Momo stopped and which way it faces.
+    if (!(state.mode === 'story' && state.engine && !isPlaying())) stopGame();
     persist();
     if (state.mode === 'maker') renderSprites();
   }
@@ -191,19 +193,6 @@
         ? (last ? 'You are a coding champion! Now invent your own game.' : 'Perfect code! Momo is happy.')
         : 'You used ' + count + ' blocks. Can you do it with only ' + lv.par + '?' + (lv.blocks.indexOf('repeat') >= 0 ? ' (Try “repeat”!)' : ''),
       actions: actions
-    });
-  }
-
-  function storyNotDone(engine) {
-    var left = engine.sprites.filter(function (s) { return s.kind === 'banana' && s.visible; }).length;
-    showOverlay({
-      icon: '🤔',
-      title: 'Almost!',
-      text: 'Momo still needs ' + left + ' more banana' + (left === 1 ? '' : 's') + '. Change your code and try again!',
-      actions: [
-        { label: '↺ Try again', go: true, fn: stopGame },
-        { label: '💡 Hint', fn: function () { stopGame(); $('story-hint').hidden = false; } }
-      ]
     });
   }
 
@@ -658,8 +647,8 @@
         else showOverlay({
           icon: '💥', title: 'Oops!', text: message,
           actions: [
-            { label: '↺ Try again', go: true, fn: stopGame },
-            { label: '💡 Hint', fn: function () { stopGame(); $('story-hint').hidden = false; } }
+            { label: '✏️ Fix my code', go: true, fn: hideOverlay },
+            { label: '💡 Hint', fn: function () { hideOverlay(); $('story-hint').hidden = false; } }
           ]
         });
       } else {
@@ -902,19 +891,19 @@
         text: 'Your code is running. The block that is working right now glows yellow.',
         holes: function () { return [$('stage'), q('#ws-canvas .stack')]; },
         pointAt: function () { return hero() && state.engine && cellRect(state.engine.byId.hero); },
-        done: function () { return !$('overlay').hidden; }
+        done: function () { return !$('overlay').hidden || (!!state.engine && state.engine.status !== 'running'); }
       },
       {
         title: function () { return won() ? 'You did it! 🎉' : 'So close!'; },
         text: function () {
           return won()
             ? 'Yum! You wrote your first program. Press “Next chapter ▶” whenever you’re ready for the next puzzle.'
-            : 'I didn’t reach the banana this time. Press “Try again”, check the number, and run it again. You can do it!';
+            : 'I stopped here, before the banana. Count the squares that are left, fix the number, and press ▶ Run again. You can do it!';
         },
-        holes: function () { return [q('#overlay .overlay-card')]; },
-        pointAt: function () { return q('#overlay-actions .go'); },
+        holes: function () { return won() ? [q('#overlay .overlay-card')] : [$('stage'), attachedMove()]; },
+        pointAt: function () { return won() ? q('#overlay-actions .go') : (state.engine && cellRect(state.engine.byId.hero)); },
         next: 'Finish 🎉',
-        done: function () { return $('overlay').hidden; }
+        done: function () { return won() && $('overlay').hidden; }
       }
     ];
   }
@@ -1084,6 +1073,15 @@
     });
   }
 
+  /** After a Story run, a faint Momo marks the start square, where ▶ Run begins again. */
+  function startGhosts(e) {
+    if (state.mode !== 'story' || !e || e.status === 'running') return null;
+    var start = hero();
+    var now = e.byId.hero;
+    if (!start || !now || (start.x === now.x && start.y === now.y)) return null;
+    return [{ kind: start.kind, x: start.x, y: start.y }];
+  }
+
   /* ---------- animation loop ---------- */
 
   var last = performance.now();
@@ -1097,8 +1095,9 @@
       e.update(dt);
       editor.highlight(e.activeBlockIds());
       if (state.mode === 'story' && e.status === 'running' && e.isFinished()) {
+        // The code ran out before all the bananas were found: Momo just stays where it
+        // stopped (no message), and ▶ Run tries again from the start.
         e.status = 'done';
-        storyNotDone(e);
       }
     }
     var running = isPlaying();
@@ -1109,6 +1108,7 @@
       stage.draw({
         project: state.project,
         engine: e,
+        ghosts: startGhosts(e),
         selectedId: state.mode === 'maker' ? state.selectedId : null,
         showArrows: true,
         time: now

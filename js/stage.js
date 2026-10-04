@@ -171,6 +171,19 @@
       return am - bm || a.y - b.y;
     });
 
+    // Faint copies (e.g. where Momo started) under everything else.
+    (view.ghosts || []).forEach(function (g) {
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 4]);
+      roundRect(ctx, g.x * c + 5, g.y * c + 5, c - 10, c - 10, 12);
+      ctx.stroke();
+      self.drawPicture(MC.imageInfo(g.kind, p), (g.x + 0.5) * c, (g.y + 0.5) * c, c * 0.84);
+      ctx.restore();
+    });
+
     ordered.forEach(function (s) {
       if (engine && !s.visible) return;
       var st = engine ? engine.renderState(s) : { x: s.x, y: s.y, lift: 0, rot: 0 };
