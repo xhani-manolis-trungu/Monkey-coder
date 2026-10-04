@@ -20,6 +20,8 @@ A 6-chapter story about Momo the monkey. Each chapter puts a puzzle on the stage
 
 The first time a child opens Chapter 1, a **guided tour** walks them through it. The page dims, a glowing spotlight with soft bokeh lights glides to each thing they need to use, and a pretend hand pointer shows what to do (it even demonstrates dragging a block). Steps that ask the child to act wait until they've done it. They can replay it any time with **🧭 Show me how**.
 
+If the code finishes before Momo has every banana, Momo simply stays where it stopped, still facing the same way, even while the child changes the code. A faint Momo marks the start square: **▶ Run** tries the whole program again from there, and **↺ Reset** puts everything back.
+
 Shorter programs earn more ⭐ stars, the same idea CodeMonkey uses to encourage loops. Blocks light up while they run, so kids can see what their code is doing. Progress is saved in the browser.
 
 ### 🎨 Game Maker
