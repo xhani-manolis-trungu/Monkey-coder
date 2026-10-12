@@ -35,6 +35,22 @@ Start from a story template (**Banana Party**, **Space Rescue**, **Ocean Treasur
 - Tick **⛶ Play full screen when I press Run** (under the stage) to make the stage fill the whole screen every time a game starts, or press **⛶** any time. Press **Esc** or **✕ Exit** to come back. This works in both modes.
 - Games are saved automatically. **Save to file** / **Open file** lets kids keep or share a game (`.monkey.json`).
 
+### 🏁 Turn a game into a Story level
+Grown-ups (or older kids) can build a puzzle in Game Maker and add it to Story Adventure:
+
+1. Make the game: place the pictures and give the other characters their code (a crocodile that patrols, a crown that says “you win!”…).
+2. Press **🏁 Make it a level** and choose:
+   - the **name, story, goal and hint** shown on the story card;
+   - **which character the child programs**. The others keep the code you gave them, and the child can't see or change it;
+   - whether the child **starts with an empty program** or with that character's current code;
+   - **how to win**: collect every 🍌 (or any picture), reach a picture, or when a “you win!” block runs in your game;
+   - which pictures are **“Oops!”** when touched (also when they walk into the character);
+   - **which blocks the child can use**, ticked per group (Events, Move, Looks, Control, Game);
+   - how many blocks earn **3 ⭐**.
+3. The level appears in Story Adventure after the built-in chapters, marked 🎨 and always open, with stars, hints and everything else the chapters have.
+
+**📚 My levels** lists them: play, edit (opens the game in Game Maker; press “Make it a level” again to update it), reorder or delete them. Levels are saved in the browser where they were made. **Save levels to a file** and **Add levels from a file** (`.monkey-levels.json`) move them to another device, such as a child's tablet.
+
 ## The blocks
 
 Every block has a picture at its start, so children who are still learning to read can tell blocks apart.

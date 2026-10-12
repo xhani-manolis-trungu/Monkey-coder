@@ -146,6 +146,7 @@
       sprites: sprites,
       images: [],
       rules: {
+        heroId: 'hero',
         hero: 'monkey',
         collect: 'banana',
         hazards: ['crocodile', 'water'],
@@ -155,6 +156,81 @@
         }, level.hazardText || {})
       }
     };
+  };
+
+  /* ---------- levels made in Game Maker ---------- */
+
+  // Pictures that are dangerous by default when a level is made from a game.
+  MC.DEFAULT_HAZARDS = ['crocodile', 'shark', 'ghost', 'dragon', 'ufo', 'alien', 'bee', 'snake', 'water', 'fire', 'bomb'];
+
+  MC.WIN_TYPES = ['collect', 'reach', 'block'];
+
+  /** The goal line shown on the story card, written from the level's win rule. */
+  MC.levelGoalText = function (win, project) {
+    var info = win && win.kind ? MC.imageInfo(win.kind, project) : null;
+    var pic = info ? (info.emoji || '🖼️') + ' ' + info.name : '';
+    if (win && win.type === 'collect') return 'Collect every ' + pic;
+    if (win && win.type === 'reach') return 'Reach the ' + pic;
+    return 'Win the game 🏆';
+  };
+
+  /** Make a level that came from a file (or old storage) safe to use, or throw. */
+  MC.repairCustomLevel = function (lv) {
+    if (!lv || typeof lv !== 'object' || !lv.project) throw new Error('This is not a Monkey Coder level.');
+    var project = MC.repairProject(MC.clone(lv.project));
+    var player = project.sprites.find(function (s) { return s.id === lv.playerId; });
+    if (!player) throw new Error('The level has no character for the child to program.');
+    var text = function (v, max) { return String(v == null ? '' : v).slice(0, max); };
+    var win = lv.win && MC.WIN_TYPES.indexOf(lv.win.type) >= 0 ? { type: lv.win.type } : { type: 'block' };
+    if (win.type !== 'block') {
+      win.kind = text(lv.win.kind, 40);
+      if (!project.sprites.some(function (s) { return s.kind === win.kind && s !== player; })) win = { type: 'block' };
+    }
+    var blocks = (Array.isArray(lv.blocks) ? lv.blocks : []).filter(function (t, i, all) {
+      return MC.BLOCKS[t] && all.indexOf(t) === i;
+    });
+    if (!blocks.length) blocks = ['move', 'turn'];
+    var start = MC.repairProject({ sprites: [{ kind: player.kind, scripts: lv.startScripts || [] }] }).sprites[0].scripts;
+    if (!start.length) start = MC.normalizeScripts([MC.S(24, 24, [{ type: 'on_start', args: {} }])]);
+    return {
+      id: /^[\w-]{1,40}$/.test(lv.id || '') ? lv.id : MC.uid('lv'),
+      custom: true,
+      title: text(lv.title, 40) || project.title || 'My level',
+      story: text(lv.story, 300),
+      goal: text(lv.goal, 80) || MC.levelGoalText(win, project),
+      hint: text(lv.hint, 200),
+      blocks: blocks,
+      par: Math.max(1, Math.min(99, Math.round(+lv.par) || 5)),
+      playerId: player.id,
+      startScripts: start,
+      win: win,
+      hazards: (Array.isArray(lv.hazards) ? lv.hazards : []).map(function (k) { return text(k, 40); })
+        .filter(function (k, i, all) { return k && all.indexOf(k) === i && k !== player.kind; }),
+      project: project
+    };
+  };
+
+  /** Turn a level made in Game Maker into a project the engine and stage understand. */
+  MC.buildCustomLevelProject = function (level, scripts) {
+    var p = MC.clone(level.project);
+    p.sprites.forEach(function (s) { if (s.id === 'hero') s.id = MC.uid('s'); });
+    var hero = p.sprites.find(function (s) { return s.id === level.playerId; });
+    hero.id = 'hero';
+    hero.scripts = MC.normalizeScripts(MC.clone(scripts && scripts.length ? scripts : level.startScripts));
+    var hazardText = {};
+    level.hazards.forEach(function (k) {
+      hazardText[k] = 'Oh no! Watch out for the ' + MC.imageInfo(k, p).name.toLowerCase() + '. Try a different path!';
+    });
+    p.title = level.title;
+    p.rules = {
+      heroId: 'hero',
+      hero: hero.kind,
+      collect: level.win.type === 'collect' ? level.win.kind : null,
+      reach: level.win.type === 'reach' ? level.win.kind : null,
+      hazards: level.hazards.slice(),
+      hazardText: hazardText
+    };
+    return p;
   };
 
   /** Stars: 3 if the program is as short as ours, fewer if it's longer. */
