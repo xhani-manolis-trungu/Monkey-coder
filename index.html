@@ -34,7 +34,7 @@
     <section class="stage-col">
       <!-- Story card (Story mode) -->
       <div class="story-card story-only">
-        <div class="story-avatar">🐒</div>
+        <div class="story-avatar" id="story-avatar">🐒</div>
         <div class="story-text">
           <div class="story-chapter" id="story-chapter">Chapter 1</div>
           <h1 class="story-title" id="story-title">Hungry Monkey</h1>
@@ -43,6 +43,10 @@
             <div class="story-goal">🎯 <span id="story-goal"></span></div>
             <button type="button" class="hint-btn" id="btn-hint">💡 Hint</button>
             <button type="button" class="hint-btn guide-btn" id="btn-guide">🧭 Show me how</button>
+            <span class="level-tools" id="level-tools" hidden>
+              <button type="button" class="hint-btn edit-btn" id="btn-edit-level" title="Change this level’s settings">✏️ Edit level</button>
+              <button type="button" class="hint-btn delete-btn" id="btn-delete-level" title="Delete this level" aria-label="Delete this level">🗑️</button>
+            </span>
           </div>
           <div class="story-hint" id="story-hint" hidden></div>
         </div>
@@ -60,6 +64,10 @@
           <button type="button" class="pill" id="btn-new">✨ New game</button>
           <button type="button" class="pill" id="btn-export">💾 Save to file</button>
           <button type="button" class="pill" id="btn-import">📂 Open file</button>
+        </div>
+        <div class="maker-row file-row level-row">
+          <button type="button" class="pill level-btn" id="btn-make-level" title="Turn this game into a puzzle in Story Adventure">🏁 Make it a level</button>
+          <button type="button" class="pill" id="btn-my-levels" title="Play, edit, order or share the levels you made">📚 My levels</button>
         </div>
       </div>
 
@@ -148,6 +156,7 @@
 
   <input type="file" id="file-image" accept="image/*" hidden>
   <input type="file" id="file-project" accept=".json,application/json" hidden>
+  <input type="file" id="file-levels" accept=".json,application/json" hidden>
 
   <script src="js/assets.js"></script>
   <script src="js/sound.js"></script>

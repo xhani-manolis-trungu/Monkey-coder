@@ -901,3 +901,89 @@ input[type="number"].block-input::-webkit-outer-spin-button { -webkit-appearance
 @media (prefers-reduced-motion: reduce) {
   .tour-card.pop, .tour-doit, .tour-ripple { animation: none; }
 }
+
+/* ---------- Game Maker → Story level ---------- */
+.level-btn { border-color: var(--green); color: var(--green); }
+.level-dot.custom { border-style: dashed; }
+.form-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
+.form-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.form-label { font-weight: 800; font-size: 15px; }
+.form-note { color: var(--muted); font-size: 13px; line-height: 1.35; }
+.form-input {
+  width: 100%;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font-size: 16px;
+}
+.form-input:focus { outline: none; border-color: var(--accent); }
+textarea.form-input { resize: vertical; line-height: 1.35; }
+select.form-input { width: auto; max-width: 100%; }
+.form-input.narrow { width: 5em; display: inline-block; margin: 0 6px; }
+.inline-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.radio-row { display: flex; flex-direction: column; gap: 4px; }
+.radio { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.radio input { width: 18px; height: 18px; accent-color: var(--green); }
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.pic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px 2px 6px;
+  background: var(--panel-2);
+  cursor: pointer;
+}
+.pic-chip input, .block-chip input { width: 17px; height: 17px; accent-color: var(--green); }
+.block-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.picker-group { display: flex; flex-direction: column; gap: 4px; border: 2px solid var(--line); border-radius: 14px; padding: 8px; background: var(--panel-2); }
+.picker-head { display: flex; align-items: center; gap: 8px; }
+.picker-head b { margin-right: auto; }
+.link-btn { border: 0; background: none; padding: 0 2px; color: var(--muted); text-decoration: underline; font-size: 13px; }
+.block-chip {
+  --c: #888;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 6px solid var(--c);
+  border-radius: 8px;
+  padding: 2px 6px;
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.chip-icon { font-size: 18px; width: 24px; text-align: center; flex: none; }
+.form-error {
+  background: #ffe3e3;
+  color: #8a1c1f;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.my-levels { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.my-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  flex-wrap: wrap;
+}
+.my-level-icon { font-size: 30px; line-height: 1; }
+.my-level-text { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
+.my-level-text small { color: var(--muted); }
+.my-level-tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.my-level-tools .pill:disabled { opacity: 0.4; cursor: default; }
+
+.level-tools { display: inline-flex; gap: 6px; }
+.level-tools[hidden] { display: none !important; }
+.edit-btn { background: #e8f8ee; color: #146c3a; }
+.delete-btn { background: #ffe3e3; color: #8a1c1f; }
+.form-top-actions { margin: -6px 0 12px; }

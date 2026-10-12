@@ -123,7 +123,10 @@
     var self = this;
     sprite.scripts.forEach(function (st) {
       var hat = st.blocks[0];
-      if (hat && hat.type === type && match(hat)) self.startThread(sprite, st, ctx || {});
+      if (!hat || hat.type !== type || !match(hat)) return;
+      var th = self.startThread(sprite, st, ctx || {});
+      // "when I touch…" scripts are reactions to something that just happened.
+      if (th && type === 'on_touch') th.reaction = true;
     });
   };
 
@@ -178,6 +181,23 @@
     return !hasKeys;
   };
 
+  /**
+   * Story Adventure: has the child's character finished its code? The rest of the
+   * world (a patrolling crocodile, say) may still be busy, but the run is over.
+   */
+  Engine.prototype.heroDone = function () {
+    if (this.status !== 'running') return true;
+    var self = this;
+    var hero = this.sprites.find(function (s) { return self.isHero(s); });
+    if (!hero) return this.isFinished();
+    if (this.threads.some(function (t) { return t.sprite === hero; })) return false;
+    // Let reactions finish first, e.g. a crown's "when I touch 🐠 → you win!".
+    if (this.threads.some(function (t) { return t.reaction; })) return false;
+    if (this.timers.some(function (t) { return t.sprite === hero; })) return false;
+    // A character steered with the arrow keys keeps going until the player stops.
+    return !hero.scripts.some(function (st) { return st.blocks[0] && st.blocks[0].type === 'on_key'; });
+  };
+
   /** Block ids that are running right now (to make them glow in the editor). */
   Engine.prototype.activeBlockIds = function () {
     var ids = [];
@@ -222,25 +242,44 @@
   };
 
   /** Called whenever a sprite lands on a square. */
+  /** Is this the character the child programs (Story Adventure)? */
+  Engine.prototype.isHero = function (s) {
+    var r = this.rules;
+    return !!r && (r.heroId ? s.id === r.heroId : s.kind === r.hero);
+  };
+
+  /** Story rules when the child's character and another picture meet. */
+  Engine.prototype.heroMeets = function (hero, o) {
+    var r = this.rules;
+    if (this.status !== 'running' || !o.visible || !hero.visible) return;
+    if (r.collect && o.kind === r.collect) {
+      o.visible = false;
+      this.collected += 1;
+      this.effect('sparkle', o.x, o.y);
+      this.sound('coin');
+      var left = this.sprites.some(function (q) { return q.kind === r.collect && q.visible; });
+      if (!left) this.end('win');
+    } else if (r.reach && o.kind === r.reach) {
+      this.effect('sparkle', o.x, o.y);
+      this.end('win');
+    } else if (r.hazards && r.hazards.indexOf(o.kind) >= 0) {
+      this.effect('boom', o.x, o.y);
+      this.end('lose', (r.hazardText && r.hazardText[o.kind]) || 'Oh no! Try again.');
+    }
+  };
+
+  /** Called whenever a sprite lands on a square. */
   Engine.prototype.arrived = function (s) {
     var self = this;
-    var r = this.rules;
     var others = this.spritesAt(s.x, s.y, s);
-    if (r && s.kind === r.hero) {
-      others.forEach(function (o) {
-        if (self.status !== 'running') return;
-        if (o.kind === r.collect && o.visible) {
-          o.visible = false;
-          self.collected += 1;
-          self.effect('sparkle', o.x, o.y);
-          self.sound('coin');
-          var left = self.sprites.some(function (q) { return q.kind === r.collect && q.visible; });
-          if (!left) self.end('win');
-        } else if (r.hazards && r.hazards.indexOf(o.kind) >= 0) {
-          self.effect('boom', o.x, o.y);
-          self.end('lose', (r.hazardText && r.hazardText[o.kind]) || 'Oh no! Try again.');
-        }
-      });
+    if (this.rules) {
+      if (this.isHero(s)) {
+        others.forEach(function (o) { self.heroMeets(s, o); });
+      } else {
+        // Something walked onto the child's character (a patrolling crocodile, say).
+        var hero = others.find(function (o) { return self.isHero(o); });
+        if (hero) this.heroMeets(hero, s);
+      }
     }
     if (this.status !== 'running') return;
     this.spritesAt(s.x, s.y, s).forEach(function (o) {
