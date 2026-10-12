@@ -49,7 +49,9 @@ Grown-ups (or older kids) can build a puzzle in Game Maker and add it to Story A
    - how many blocks earn **3 ⭐**.
 3. The level appears in Story Adventure after the built-in chapters, marked 🎨 and always open, with stars, hints and everything else the chapters have.
 
-**📚 My levels** lists them: play, edit (opens the game in Game Maker; press “Make it a level” again to update it), reorder or delete them. Levels are saved in the browser where they were made. **Save levels to a file** and **Add levels from a file** (`.monkey-levels.json`) move them to another device, such as a child's tablet.
+Levels you made show **✏️ Edit level** and **🗑️** on their story card in Story Adventure. **✏️ Edit** opens the level's settings, and its **🎨 Change the stage in Game Maker** button opens the game itself; press “Make it a level” again there to update the level. Changing only words, blocks or stars keeps the child's code; changing the stage, the character or its starting code starts the child again from the new starting code.
+
+**📚 My levels** (in Game Maker) lists them all: play ▶, edit ✏️, change the stage 🎨, reorder ▲▼ or delete 🗑️. Levels are saved in the browser where they were made. **Save levels to a file** and **Add levels from a file** (`.monkey-levels.json`) move them to another device, such as a child's tablet.
 
 ## The blocks
 

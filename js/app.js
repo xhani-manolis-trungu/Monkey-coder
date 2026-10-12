@@ -191,6 +191,7 @@
     $('story-hint').textContent = '💡 ' + lv.hint;
     $('story-hint').hidden = true;
     $('btn-hint').hidden = !lv.hint;
+    $('level-tools').hidden = !lv.custom;
     $('btn-guide').hidden = state.levelIndex !== 0;
     renderLevels();
   }
@@ -938,13 +939,18 @@
     return sel;
   }
 
-  function showMakeLevel() {
-    var p = state.maker;
+  /**
+   * The level settings window. With no argument it turns the Game Maker game into a
+   * level; with a saved level it edits that level's settings directly.
+   */
+  function showMakeLevel(editing) {
+    editing = editing && editing.custom ? editing : null;
+    var p = editing ? MC.repairProject(MC.clone(editing.project)) : state.maker;
     if (!p.sprites.length) {
       askConfirm('Add some characters first', 'Drag pictures onto the stage and give them code, then turn your game into a level.', 'OK', function () {});
       return;
     }
-    var existing = p.levelId && customIndex(p.levelId) >= 0 ? state.customLevels[customIndex(p.levelId)] : null;
+    var existing = editing || (p.levelId && customIndex(p.levelId) >= 0 ? state.customLevels[customIndex(p.levelId)] : null);
     var selected = spriteById(state.selectedId);
     var player = (existing && p.sprites.find(function (s) { return s.id === existing.playerId; })) ||
       selected || p.sprites.find(function (s) { return s.scripts.length; }) || p.sprites[0];
@@ -999,10 +1005,20 @@
     function renderForm(c) {
       c.innerHTML = '';
       c.classList.add('level-form');
-      var t = h('h2', null, '🏁 Make it a Story level');
+      var t = h('h2', null, editing ? '✏️ Edit “' + editing.title + '”' : '🏁 Make it a Story level');
       t.id = 'modal-title';
       c.appendChild(t);
-      c.appendChild(h('p', 'lead', 'Your game becomes a puzzle in Story Adventure, after the built-in chapters. The child writes the code for one character; the others keep the code you gave them.'));
+      c.appendChild(h('p', 'lead', editing
+        ? 'Change how this level works. To move pictures or change what the other characters do, change the stage in Game Maker.'
+        : 'Your game becomes a puzzle in Story Adventure, after the built-in chapters. The child writes the code for one character; the others keep the code you gave them.'));
+      if (editing) {
+        var stageBtn = h('button', 'pill', '🎨 Change the stage in Game Maker');
+        stageBtn.type = 'button';
+        stageBtn.addEventListener('click', function () { openLevelInMaker(editing); });
+        var stageRow = h('div', 'inline-row form-top-actions');
+        stageRow.appendChild(stageBtn);
+        c.appendChild(stageRow);
+      }
 
       var playerSprite = p.sprites.find(function (s) { return s.id === f.playerId; }) || p.sprites[0];
       var form = h('div', 'form-grid');
@@ -1173,7 +1189,7 @@
           lab.appendChild(document.createTextNode(' ' + o[1]));
           tg.appendChild(lab);
         });
-        form.appendChild(formField('This game is already a level', tg));
+        form.appendChild(formField(editing ? 'Save' : 'This game is already a level', tg));
       }
 
       c.appendChild(form);
@@ -1229,21 +1245,35 @@
       delete raw.project.levelId;
       var lv;
       try { lv = MC.repairCustomLevel(raw); } catch (e) { return; }
+      var key = currentLevelKey();
       if (update) {
+        var old = state.customLevels[customIndex(lv.id)];
+        // If the stage, the character or its starting code changed, the child starts again from
+        // the new starting code. Changing only words, blocks or stars keeps the child's code.
+        var sameAs = function (lvl) {
+          // Block ids are made fresh on every save, so leave them out of the comparison.
+          return JSON.stringify([lvl.project.sprites, lvl.playerId, lvl.startScripts], function (k, v) { return k === 'id' && typeof v === 'string' && /^b/.test(v) ? undefined : v; });
+        };
+        var changed = sameAs(old) !== sameAs(lv);
         state.customLevels[customIndex(lv.id)] = lv;
-        delete state.storyScripts['c:' + lv.id]; // the level changed: start from its new starting code
-        save('story', state.storyScripts);
+        if (changed) {
+          delete state.storyScripts['c:' + lv.id];
+          save('story', state.storyScripts);
+        }
       } else {
         state.customLevels.push(lv);
       }
       saveCustomLevels();
-      p.levelId = lv.id;
-      persist();
+      if (!editing) {
+        p.levelId = lv.id;
+        persist();
+      }
+      reloadStoryAt(key);
       MC.Sound.play('win');
       var chapter = MC.LEVELS.length + customIndex(lv.id) + 1;
       openModal(function (c) {
         c.classList.remove('level-form');
-        var t = h('h2', null, '🎉 “' + lv.title + '” is ready!');
+        var t = h('h2', null, update ? '✅ “' + lv.title + '” is saved' : '🎉 “' + lv.title + '” is ready!');
         t.id = 'modal-title';
         c.appendChild(t);
         c.appendChild(h('p', 'lead', 'It is chapter ' + chapter + ' in Story Adventure. Children see it after the built-in chapters, and it is always open.'));
@@ -1251,7 +1281,7 @@
         var play = h('button', 'pill go', '▶ Play it now');
         play.type = 'button';
         play.addEventListener('click', function () { playCustomLevel(lv.id); });
-        var keep = h('button', 'pill', '🎨 Keep editing');
+        var keep = h('button', 'pill', editing ? 'Close' : '🎨 Keep editing');
         keep.type = 'button';
         keep.addEventListener('click', closeModal);
         row.appendChild(play);
@@ -1298,14 +1328,12 @@
           tools.appendChild(b);
         }
         tool('▶', 'Play “' + lv.title + '”', function () { playCustomLevel(lv.id); });
-        tool('✏️', 'Edit “' + lv.title + '” in Game Maker', function () { editLevel(lv); });
+        tool('✏️', 'Edit “' + lv.title + '”', function () { showMakeLevel(lv); });
+        tool('🎨', 'Change the stage of “' + lv.title + '” in Game Maker', function () { openLevelInMaker(lv); });
         tool('▲', 'Move up', function () { moveLevel(j, -1); renderList(c); }, j === 0);
         tool('▼', 'Move down', function () { moveLevel(j, 1); renderList(c); }, j === state.customLevels.length - 1);
         tool('🗑️', 'Delete “' + lv.title + '”', function () {
-          askConfirm('Delete “' + lv.title + '”?', 'It disappears from Story Adventure in this browser. Save your levels to a file first if you might want it back.', '🗑️ Yes, delete it', function () {
-            deleteLevel(lv.id);
-            showMyLevels();
-          });
+          confirmDeleteLevel(lv, showMyLevels);
         });
         row.appendChild(tools);
         list.appendChild(row);
@@ -1363,7 +1391,15 @@
     reloadStoryAt(key === 'c:' + id ? null : key);
   }
 
-  function editLevel(lv) {
+  function confirmDeleteLevel(lv, after) {
+    askConfirm('Delete “' + lv.title + '”?', 'It disappears from Story Adventure in this browser, with its stars. Save your levels to a file first if you might want it back.', '🗑️ Yes, delete it', function () {
+      deleteLevel(lv.id);
+      MC.Sound.play('drum');
+      if (after) after();
+    });
+  }
+
+  function openLevelInMaker(lv) {
     function open() {
       state.maker = MC.repairProject(MC.clone(lv.project));
       state.maker.levelId = lv.id;
@@ -1373,7 +1409,7 @@
       persist();
     }
     if (state.maker && state.maker.levelId === lv.id) { closeModal(); setMode('maker'); return; }
-    askConfirm('Open “' + lv.title + '” in Game Maker?', 'Your current Game Maker game' + (state.maker && state.maker.title ? ' “' + state.maker.title + '”' : '') + ' will be replaced. Save it to a file first if you want to keep it. When you are done, press “🏁 Make it a level” to update the level.', '✏️ Open it', open);
+    askConfirm('Open “' + lv.title + '” in Game Maker?', 'Your current Game Maker game' + (state.maker && state.maker.title ? ' “' + state.maker.title + '”' : '') + ' will be replaced. Save it to a file first if you want to keep it. When you are done, press “🏁 Make it a level” to update the level.', '🎨 Open it', open);
   }
 
   function importLevels(text) {
@@ -1563,7 +1599,9 @@
   $('btn-export').addEventListener('click', function () {
     downloadJSON(safeName(state.maker.title, 'my-game') + '.monkey.json', state.maker);
   });
-  $('btn-make-level').addEventListener('click', showMakeLevel);
+  $('btn-make-level').addEventListener('click', function () { showMakeLevel(); });
+  $('btn-edit-level').addEventListener('click', function () { if (level().custom) showMakeLevel(level()); });
+  $('btn-delete-level').addEventListener('click', function () { if (level().custom) confirmDeleteLevel(level()); });
   $('btn-my-levels').addEventListener('click', showMyLevels);
   $('file-levels').addEventListener('change', function (e) {
     var file = e.target.files[0];

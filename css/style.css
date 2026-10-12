@@ -981,3 +981,9 @@ select.form-input { width: auto; max-width: 100%; }
 .my-level-text small { color: var(--muted); }
 .my-level-tools { display: flex; gap: 4px; flex-wrap: wrap; }
 .my-level-tools .pill:disabled { opacity: 0.4; cursor: default; }
+
+.level-tools { display: inline-flex; gap: 6px; }
+.level-tools[hidden] { display: none !important; }
+.edit-btn { background: #e8f8ee; color: #146c3a; }
+.delete-btn { background: #ffe3e3; color: #8a1c1f; }
+.form-top-actions { margin: -6px 0 12px; }
