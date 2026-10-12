@@ -112,7 +112,7 @@ Monkey Coder is an installable web app (a *PWA*). On a phone or tablet it gets i
 - **Android (Chrome):** open the link and press **📲 Install** at the top of the game, or Chrome's **⋮** menu → **Install app** / **Add to Home screen**.
 - **iPhone / iPad (Safari):** open the link, press **Share** → **Add to Home Screen**.
 
-Updates arrive by themselves: the app checks for a new version in the background and uses it the next time it's opened.
+Updates arrive by themselves. Each time the app is opened, or brought back from the background, it checks for a new version. If one turns up in the first few seconds, the app reloads straight into it. Otherwise a **✨ Update** button appears in the top bar, so a game in progress isn't interrupted.
 
 How it works: `manifest.webmanifest` gives the app its name, colours and icons (`icons/`, including a *maskable* icon that Android shapes into a circle or squircle). `sw.js` is a service worker that keeps a copy of every file on the device; `tests/pwa.test.js` makes sure its file list matches what the page loads. The **Website** workflow (`.github/workflows/pages.yml`) publishes the game to GitHub Pages on every push to `main`.
 

@@ -1,7 +1,8 @@
 /*
  * Service worker: keeps a copy of the game on the device so the installed app
  * opens instantly and works with no internet. Files are served from the copy
- * and refreshed in the background, so a new version shows up on the next start.
+ * and refreshed in the background. When a new version is published, the page
+ * notices the new worker and reloads (or shows an ✨ Update button).
  */
 'use strict';
 
@@ -34,7 +35,10 @@ var FILES = [
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE)
-      .then(function (cache) { return cache.addAll(FILES); })
+      // 'reload' skips the browser's own HTTP cache, so the new copy really is new.
+      .then(function (cache) {
+        return cache.addAll(FILES.map(function (f) { return new Request(f, { cache: 'reload' }); }));
+      })
       .then(function () { return self.skipWaiting(); })
   );
 });
@@ -54,7 +58,8 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
-  var fresh = fetch(req).then(function (res) {
+  // 'no-cache' asks the website whether the file changed instead of trusting the HTTP cache.
+  var fresh = fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(function (res) {
     if (!res || !res.ok) return res;
     var copy = res.clone();
     return caches.open(CACHE).then(function (cache) { return cache.put(req, copy); }).then(function () { return res; });

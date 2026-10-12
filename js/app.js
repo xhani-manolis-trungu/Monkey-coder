@@ -1694,8 +1694,26 @@
   // Keep a copy of the game on the device so the installed app works offline.
   // Only on a real website: not when opened as a file or inside the Windows app.
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    var openedAt = Date.now();
+    var hadWorker = !!navigator.serviceWorker.controller;
+    var updateBtn = $('btn-update');
+    updateBtn.addEventListener('click', function () { location.reload(); });
+
+    // A new version took over. Right after opening, just reload; later, let the player choose when.
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadWorker) { hadWorker = true; return; }
+      var running = state.engine && state.engine.status === 'running';
+      if (Date.now() - openedAt < 10000 && !running) location.reload();
+      else updateBtn.hidden = false;
+    });
+
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('sw.js').catch(function () { /* the game works without it */ });
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        // An installed app often stays open in the background, so look again when it comes back.
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible') reg.update().catch(function () {});
+        });
+      }).catch(function () { /* the game works without it */ });
     });
   }
 
